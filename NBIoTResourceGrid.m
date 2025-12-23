@@ -4,7 +4,9 @@ classdef NBIoTResourceGrid < handle
     % Параметры ресурсной сетки
     properties (Access = public)
         Config;         % Конфиг
+        frames NBIoTFrame;
         resourceGrid;   % Непосредственно ресурсная сетка
+        NRS_shift = 0;              % Сдвиг NRS
     end
     properties (Access = protected)
         subframesInFrame = 10;          % Количество субфреймов в одном фрейме
@@ -14,7 +16,7 @@ classdef NBIoTResourceGrid < handle
         
         GridGenerated = 0;         % Сгенерировали ли пустую ресурсную сетку
 
-        NRS_shift = 0;              % Сдвиг NRS
+
 
     end
     properties (Access = private)
@@ -53,7 +55,7 @@ classdef NBIoTResourceGrid < handle
 
             % Задание стандартных значений
             obj.Config.totalFrames = obj.defaultTotalFrames;
-            obj.Config.StartFrame = obj.defaultStartFrame;
+            obj.Config.startFrame = obj.defaultStartFrame;
             obj.Config.NCellID = obj.defaultNCellID;
 
             obj.Config.Colormap.empty = obj.defaultColor_empty;
@@ -78,10 +80,14 @@ classdef NBIoTResourceGrid < handle
             obj.resourceGrid = ones(obj.totalSubcarriers, totalOFDMSymbols, 2);
             
             obj.NRS_shift = mod(obj.Config.NCellID, 6);     % Расчёт сдвига NRS
+            
+            for frameID = 0:obj.Config.totalFrames-1
+                obj.frames(frameID+1) = NBIoTFrame(obj, frameID+obj.Config.startFrame);
+            end
 
-            obj.gen_NPSS();
-            obj.gen_NSSS();
-            obj.gen_NPBCH();
+            grids = {obj.frames.frameGrid};
+            obj.resourceGrid = cat(2, grids{:});
+                
 
         end
 
@@ -132,92 +138,4 @@ classdef NBIoTResourceGrid < handle
 
         end
     end
-
-
-    % Методы генерации сигналов
-    methods (Access = protected)
-        
-        % создаём NPBCH
-        function gen_NPBCH(obj)
-            totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
-            
-            for subcarrier_index = 1:obj.totalSubcarriers
-                for slot_index = 1:obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame:totalOFDMSymbols
-                    % Оставляем место
-                    if ismember(subcarrier_index, mod([0 3 6 9]+obj.NRS_shift, 12)+1)
-                        obj.resourceGrid(subcarrier_index, slot_index+3, 2) = 5;
-                        obj.resourceGrid(subcarrier_index, slot_index+9:slot_index+10, 2) = 5;
-                    else
-                        obj.resourceGrid(subcarrier_index, slot_index+3:slot_index+13, 2) = 5;
-                    end
-                end
-            end
-
-        end
-
-        % создаём NPSS
-        function gen_NPSS(obj)
-            totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
-
-            cyclic_prefix = [1 1 1 1 -1 -1 1 1 1 -1 1]; % Циклический префикс для генерации NPSS в символах 3-13
-            u = 5;
-            n = (0:10)';
-
-            d = cyclic_prefix .* exp((-1i.*pi.*u.*n.*(n+1))./(11));
-            % disp(d);
-
-            for subcarrier_index = 1:obj.totalSubcarriers-1
-                for slot_index = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * 5 + 1:obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame:totalOFDMSymbols
-                    obj.resourceGrid(subcarrier_index, slot_index+3:slot_index+13, 2) = 3;
-                    obj.resourceGrid(subcarrier_index, slot_index+3:slot_index+13, 1) = d(subcarrier_index, :);
-                end
-            end
-        end
-        
-        % создаём NSSS
-        function gen_NSSS(obj)
-            totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
-            
-            n = 0:131;
-            n_ = mod(n,131);
-            m = mod(n,128);
-            u = mod(obj.Config.NCellID, 126) + 3;
-            q = floor(obj.Config.NCellID./126);
-            
-            b = [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1;
-                 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1;
-                 1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1;
-                 1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1  -1  1  1  -1  1  -1  -1  1  -1  1  1  -1  1  -1  -1  1  1  -1  -1  1  -1  1  1  -1];
-            
-            d = b(q+1, m+1) .* exp(-1i.*2.*pi.*n) .* exp(-1i.*((pi.*u.*n_.*(n_+1))./(131)));
-            d_ = [];
-            while ~isempty(d)
-                cusochek = d(1:12)';
-                d = d(13:end);
-                d_ = [d_ cusochek];
-            end
-
-            for subcarrier_index = 1:obj.totalSubcarriers
-                NPSS_generated = 0;
-                for slot_index = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * 9 + (mod(obj.Config.StartFrame,2))*obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame + 1:obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame*2:totalOFDMSymbols
-                    obj.resourceGrid(subcarrier_index, slot_index+3:slot_index+13, 2) = 4;
-
-                    if mod(obj.Config.StartFrame, 2) == 0
-                        n_f = obj.Config.StartFrame + NPSS_generated.*2;
-                    else
-                        n_f = obj.Config.StartFrame + 1 + NPSS_generated.*2;
-                    end
-
-                    cyclic_shift = mod((((33)./(132)).*((n_f)./2)), 4);
-                    d__ = d_ .* exp(cyclic_shift);
-                    
-                    obj.resourceGrid(subcarrier_index, slot_index+3:slot_index+13, 1) = d__(subcarrier_index, :);
-
-                    NPSS_generated = NPSS_generated + 1;
-                end
-            end
-        end
-
-    end
-
 end

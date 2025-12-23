@@ -1,11 +1,11 @@
 clear;
 
 grid = NBIoTResourceGrid;
-grid.Config.totalFrames = 2;
+grid.Config.totalFrames = 1;
 grid.Config.NCellID = 0;
-grid.Config.StartFrame = 0;
+grid.Config.startFrame = 0;
 
-grid.GridGen;
+grid.GridGen();
 
 grid.resourceGrid(1,1,2) = 2;
 grid.resourceGrid(1,2,2) = 3;
