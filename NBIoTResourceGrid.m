@@ -5,6 +5,7 @@ classdef NBIoTResourceGrid < handle
     properties (Access = public)
         Config;         % Конфиг
         frames NBIoTFrame;
+        processedBits;  % Обработанные биты, готовые к засовыванию в ресурсную сетку
         resourceGrid;   % Непосредственно ресурсная сетка
         NRS_shift = 0;              % Сдвиг NRS
     end
@@ -23,6 +24,8 @@ classdef NBIoTResourceGrid < handle
         defaultTotalFrames = 1;    % Всего фреймов
         defaultStartFrame = 0;     % Стартовый фрейм
         defaultNCellID = 0;        % ID соты
+
+        defaultBits_NPBCH = (square(1:1600,50)+1)/2;    % Дефолтный набор битов, передающийся в NPBCH
         
         % defaultColor_empty = [255 255 255];
         % defaultColor_NRS = [0 0 0];
@@ -58,6 +61,8 @@ classdef NBIoTResourceGrid < handle
             obj.Config.startFrame = obj.defaultStartFrame;
             obj.Config.NCellID = obj.defaultNCellID;
 
+            obj.Config.Bits.NPBCH = obj.defaultBits_NPBCH;
+
             obj.Config.Colormap.empty = obj.defaultColor_empty;
             obj.Config.Colormap.NRS = obj.defaultColor_NRS;
             obj.Config.Colormap.NPSS = obj.defaultColor_NPSS;
@@ -70,7 +75,7 @@ classdef NBIoTResourceGrid < handle
         
         % Вызывать эту функцию надо после конфигурации
         function GridGen(obj)
-            %NBIoTResourceGrid Создание пустой сетки
+            %NBIoTResourceGrid Создание сетки
 
             totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
             % Добавляем в ресурсную сетку "третье измерение" - индекс,
@@ -81,10 +86,18 @@ classdef NBIoTResourceGrid < handle
             
             obj.NRS_shift = mod(obj.Config.NCellID, 6);     % Расчёт сдвига NRS
             
+            % Скремблирование и QPSK-модуляция битов
+            scrambler_NPBCH = NBIoTScrambler(obj.Config.Bits.NPBCH, obj.Config.NCellID,"NPBCH");
+            modulator_NPBCH = NBIoTQPSK(scrambler_NPBCH.scrambledBits);
+            obj.processedBits.NPBCH = modulator_NPBCH.modulatedBits;
+
+
+            % Создание объектов фреймов
             for frameID = 0:obj.Config.totalFrames-1
                 obj.frames(frameID+1) = NBIoTFrame(obj, frameID+obj.Config.startFrame);
             end
-
+            
+            % Соединение фреймов
             grids = {obj.frames.frameGrid};
             obj.resourceGrid = cat(2, grids{:});
                 
@@ -94,7 +107,7 @@ classdef NBIoTResourceGrid < handle
         % Вывод ресурсной сетки
         function showResourceGrid(obj)
             if ~obj.GridGenerated
-                 error('Ресурсная сетка не сгенерирована! Используй emptyGridGen после конфигурации!');
+                 error('Ресурсная сетка не сгенерирована! Используй GridGen после конфигурации!');
             end
             
             colorConfig = obj.Config.Colormap;

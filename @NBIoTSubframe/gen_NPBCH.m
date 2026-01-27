@@ -1,6 +1,7 @@
 % Создание сигнала NPBCH в соответствии с документацией
 function subframeGrid = gen_NPBCH(obj)
     subframeGrid = obj.subframeGrid;
+    bitsToMap = obj.parentFrame.bitsToMap.NPBCH;
 
     
     for subcarrier_index = 1:obj.totalSubcarriers
@@ -9,6 +10,16 @@ function subframeGrid = gen_NPBCH(obj)
             subframeGrid(subcarrier_index, 10:11, 2) = 5;
         else
             subframeGrid(subcarrier_index, 4:14, 2) = 5;
+        end
+    end
+
+    i = 1;
+    for subcarrier_index = 1:obj.totalSubcarriers
+        for subframe_index = 1:obj.symbolsInSubframe
+            if subframeGrid(subcarrier_index,subframe_index,2) == 5
+                subframeGrid(subcarrier_index,subframe_index,1) = bitsToMap(i);
+                i=i+1;
+            end
         end
     end
 end
