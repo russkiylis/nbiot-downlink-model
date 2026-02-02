@@ -41,6 +41,8 @@ classdef NBIoTSubframe < handle
         subframeGrid = gen_NPSS(obj)
         subframeGrid = gen_NSSS(obj)
         subframeGrid = gen_NPBCH(obj)
+        subframeGrid = gen_NPDSCH(obj)
+        subframeGrid = gen_NPDCCH(obj)
 
     end
 end

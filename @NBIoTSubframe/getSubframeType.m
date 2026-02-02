@@ -6,28 +6,74 @@ function subframeType = getSubframeType(obj)
             subframeType = "NPBCH";
 
         case 1
-            subframeType = "null"; %
+            if obj.parentFrame.parentGrid.Config.NPDSCH.Map(2) == 1
+                subframeType = "NPDSCH";
+            elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(2) == 1
+                subframeType = "NPDCCH";
+            else
+                subframeType = "null";
+            end
 
         case 2
-            subframeType = "null"; %
+            if obj.parentFrame.parentGrid.Config.NPDSCH.Map(3) == 1
+                subframeType = "NPDSCH";
+            elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(3) == 1
+                subframeType = "NPDCCH";
+            else
+                subframeType = "null";
+            end
 
-        case 3
-            subframeType = "null"; %
+        case 3 %% ТУТ МОЖЕТ БЫТЬ SIB1-NB
+            if obj.parentFrame.parentGrid.Config.NPDSCH.SIB1NBGen == false
+                if obj.parentFrame.parentGrid.Config.NPDSCH.Map(4) == 1
+                    subframeType = "NPDSCH";
+                elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(4) == 1
+                    subframeType = "NPDCCH";
+                else
+                    subframeType = "null";
+                end
+            end
 
-        case 4
-            subframeType = "null"; %
+        case 4 %% ТУТ МОЖЕТ БЫТЬ SIB1-NB
+            if obj.parentFrame.parentGrid.Config.NPDSCH.SIB1NBGen == false
+                if obj.parentFrame.parentGrid.Config.NPDSCH.Map(5) == 1
+                    subframeType = "NPDSCH";
+                elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(5) == 1
+                    subframeType = "NPDCCH";
+                else
+                    subframeType = "null";
+                end
+            end
 
         case 5
             subframeType = "NPSS";
 
         case 6
-            subframeType = "null"; %
+            if obj.parentFrame.parentGrid.Config.NPDSCH.Map(7) == 1
+                subframeType = "NPDSCH";
+            elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(7) == 1
+                subframeType = "NPDCCH";
+            else
+                subframeType = "null";
+            end
 
         case 7
-            subframeType = "null"; %
+            if obj.parentFrame.parentGrid.Config.NPDSCH.Map(8) == 1
+                subframeType = "NPDSCH";
+            elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(8) == 1
+                subframeType = "NPDCCH";
+            else
+                subframeType = "null";
+            end
 
         case 8
-            subframeType = "null"; %
+            if obj.parentFrame.parentGrid.Config.NPDSCH.Map(9) == 1
+                subframeType = "NPDSCH";
+            elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(9) == 1
+                subframeType = "NPDCCH";
+            else
+                subframeType = "null";
+            end
 
         case 9
             % Исходя из документации NB-IoT, NPSS генерируется только в
@@ -35,6 +81,12 @@ function subframeType = getSubframeType(obj)
             if mod(obj.parentFrame.frameID, 2) == 0     % чётный
                 subframeType = "NSSS";
             else    % нечётный
-                subframeType = "null"; %
+                if obj.parentFrame.parentGrid.Config.NPDSCH.Map(10) == 1
+                    subframeType = "NPDSCH";
+                elseif obj.parentFrame.parentGrid.Config.NPDCCH.Map(10) == 1
+                    subframeType = "NPDCCH";
+                else
+                    subframeType = "null";
+                end
             end
     end

@@ -26,7 +26,16 @@ classdef NBIoTResourceGrid < handle
         defaultNCellID = 0;        % ID соты
 
         defaultBits_NPBCH = (square(1:1600,50)+1)/2;    % Дефолтный набор битов, передающийся в NPBCH
+
+        defaultRNTI = 1;            % Дефолтный RNTI (получатель)
+        defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH)
+        default_NPDSCH_map = [0 0 1 1 1 0 1 1 1 1];     % В каких субфреймах желательно передавать NPDSCH
+        % Генерация плотностей вероятности для дефолтных кодовых слов для передачи через NPDSCH
+        default_p1 = (sawtooth(0:0.01:10)+1)/2;
+        default_p2 = (sin(0:0.01:5)+1)/2;
         
+        default_NPDCCH_map = [0 1 0 0 0 0 0 0 0 0];     % В каких субфреймах желательно передавать NPDCCH
+
         % defaultColor_empty = [255 255 255];
         % defaultColor_NRS = [0 0 0];
         % defaultColor_NPSS = [255 90 0];
@@ -62,6 +71,14 @@ classdef NBIoTResourceGrid < handle
             obj.Config.NCellID = obj.defaultNCellID;
 
             obj.Config.Bits.NPBCH = obj.defaultBits_NPBCH;
+
+            obj.Config.NPDSCH.RNTI = obj.defaultRNTI;
+            obj.Config.NPDSCH.SIB1NBGen = obj.defaultSIB1NBGen;
+            obj.Config.NPDSCH.Map = obj.default_NPDSCH_map;
+            obj.Config.Bits.NPDSCH_Codeword1 = double(rand(1,length(obj.default_p1)) < obj.default_p1);
+            obj.Config.Bits.NPDSCH_Codeword2 = double(rand(1,length(obj.default_p2)) < obj.default_p2);
+
+            obj.Config.NPDCCH.Map = obj.default_NPDCCH_map;
 
             obj.Config.Colormap.empty = obj.defaultColor_empty;
             obj.Config.Colormap.NRS = obj.defaultColor_NRS;
