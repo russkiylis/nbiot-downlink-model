@@ -1,4 +1,5 @@
 clear; clc;
+% Быстрый сценарий для демонстрации генерации сетки.
 
 grid = NBIoTResourceGrid;
 grid.Config.Logging = true;
@@ -10,6 +11,7 @@ grid.Config.Bits.NPDSCH_Codeword{3}.Mrep = 1;
 
 grid.GridGen();
 
+% Пример ручной "раскраски" нескольких RE.
 grid.resourceGrid(1,1,2) = 2;
 grid.resourceGrid(2,1,2) = 3;
 grid.resourceGrid(3,1,2) = 4;

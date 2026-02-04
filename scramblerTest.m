@@ -1,3 +1,4 @@
+% Тест скремблера: сравнение битов до/после и проверка автокорреляции.
 bits = randi([0 1],1,1600);             % Тут уже псевдослучайное, надо бы взять другое для наглядности
 bits = (square(1:1600,50)+1)/2;
 
@@ -10,7 +11,7 @@ plot(bits);
 figure(name="Биты после скремблера")
 plot(scrambler.scrambledBits);
 
-% Проверка на хорошую КФ
+% Проверка на хорошую КФ.
 figure(name="КФ битов без скремблирования")
 tau = 1:2*length(scrambler.bits);
 for k = tau
@@ -27,7 +28,7 @@ for k = tau
 end
 plot(pakf);
 
-% Дескремблирование
+% Дескремблирование.
 descrambler = NBIoTScrambler(scrambler.scrambledBits, NCellID, "NPBCH");
 difference = sum(bits-descrambler.scrambledBits);
 if difference == 0

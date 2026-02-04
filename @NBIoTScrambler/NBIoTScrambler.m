@@ -1,5 +1,6 @@
 classdef NBIoTScrambler < handle
     %NBIOTSCRAMBLER NBIoT Scrambler
+    % Универсальный скремблер: по типу сигнала выбирает нужную последовательность.
     
     properties (SetAccess = protected)
         bits;
@@ -24,6 +25,7 @@ classdef NBIoTScrambler < handle
                     obj.scramblingSequence = obj.gen_31GoldSequence();
             end
 
+            % Скремблирование по модулю 2.
             obj.scrambledBits = mod(obj.bits+obj.scramblingSequence,2);
         end
 

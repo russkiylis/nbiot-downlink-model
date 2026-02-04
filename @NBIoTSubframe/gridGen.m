@@ -1,6 +1,6 @@
 % Генерация ресурсной сетки субфрейма
 function subframeGrid = gridGen(obj)
-    % Руководствуемся типом субфрейма
+    % Руководствуемся типом субфрейма.
     switch obj.subframeType
         case "NPSS"
             subframeGrid = obj.gen_NPSS();
@@ -13,14 +13,14 @@ function subframeGrid = gridGen(obj)
         
         case "NPDSCH"
             % На этом месте всунуть "подаватель правильных
-            % последовательностей кодовых слов для NPDSCH"
+            % последовательностей кодовых слов для NPDSCH".
             subframeGrid = obj.gen_NPDSCH();
         
         case "NPDCCH"
             subframeGrid = obj.gen_NPDCCH();
 
         otherwise
-            %%%
+            % Пустой сабфрейм (нет полезных сигналов).
             subframeGrid = obj.subframeGrid;
         
     end

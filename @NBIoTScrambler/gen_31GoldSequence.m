@@ -1,8 +1,8 @@
 % Генератор псевдослучайной последовательности
 function sequence = gen_31GoldSequence(obj)
     Nc = 1600;
-    sequence = zeros(1,length(obj.bits));    % Выделение памяти для последовательности
-    
+    sequence = zeros(1,length(obj.bits));    % Выделение памяти под последовательность
+
     % Генерация x1
     x1 = [1 zeros(1,30)];
     for n = 1:length(obj.bits)+Nc
@@ -32,7 +32,7 @@ function sequence = gen_31GoldSequence(obj)
     % plot(pakf)
 
     
-    % Генерация c
+    % Генерация c (склейка x1/x2).
 
     for n = 1:length(obj.bits)
         sequence(n) = mod(x1(n+Nc)+x2(n+Nc),2);

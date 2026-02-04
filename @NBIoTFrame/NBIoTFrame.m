@@ -1,5 +1,6 @@
 classdef NBIoTFrame < handle
     %NBIOTFRAME NBIoT Frame class
+    % Формирует фрейм и набор сабфреймов, готовых к склейке в ресурсную сетку.
 
     % Параметры фрейма
     properties (SetAccess = protected)
@@ -22,19 +23,19 @@ classdef NBIoTFrame < handle
             obj.frameID = frameID;              % Передача frameID
             
             % Создание последовательности NPBCH для занесения в ресурсную
-            % сетку данного сабфрейма
+            % сетку данного сабфрейма.
             NCellID = obj.parentGrid.Config.NCellID;
-            c_init = (NCellID+1) .* ((mod(obj.frameID,8)+1).^3) .* (2.^9) + NCellID;
-            cf = NBIoTScrambler(ones(1,200),c_init,"NPBCH").scramblingSequence;
+            c_init = (NCellID + 1) .* ((mod(obj.frameID, 8) + 1) .^ 3) .* (2 .^ 9) + NCellID;
+            cf = NBIoTScrambler(ones(1, 200), c_init, "NPBCH").scramblingSequence;
 
-            K = 100;
-            f = mod(obj.frameID,64);
+            K = 100;                    % Количество QPSK-символов на NPBCH
+            f = mod(obj.frameID, 64);   % Индекс фрейма в цикле 64
             y = obj.parentGrid.processedBits.NPBCH;
 
             theta = zeros(1,200);
-            yf = zeros(1,100);
+            yf = zeros(1,100);          % Биты для маппинга в текущем фрейме
             for i = 1:K
-                % Создание переменной theta
+                % Создание переменной theta (выбор бита по паре cf).
                 if cf(2.*(i-1)+1) == 0 && cf(2.*(i-1)+2) == 0
                     theta(i) = 0;
                 elseif cf(2.*(i-1)+1) == 0 && cf(2.*(i-1)+2) == 1
@@ -45,8 +46,8 @@ classdef NBIoTFrame < handle
                     theta(i) = 1;
                 end
                 
-                % Создание битов, готовых к занесению
-                yf(i) = theta(i) .* y(K.*floor(f./8)+i);
+                % Создание битов, готовых к занесению.
+                yf(i) = theta(i) .* y(K .* floor(f ./ 8) + i);
             end
             obj.bitsToMap.NPBCH = yf;
 

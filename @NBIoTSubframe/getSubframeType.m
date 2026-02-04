@@ -1,6 +1,7 @@
 % Выбор типа субфрейма
 function subframeType = getSubframeType(obj)
-    % Руководствуемся такими данными как subframeID
+    % Руководствуемся subframeID, картами NPDSCH/NPDCCH и флагом SIB1-NB.
+    % Индексация карт начинается с 1, поэтому subframeID + 1.
     switch obj.subframeID
         case 0
             subframeType = "NPBCH";
@@ -76,8 +77,8 @@ function subframeType = getSubframeType(obj)
             end
 
         case 9
-            % Исходя из документации NB-IoT, NPSS генерируется только в
-            % чётных фреймах
+            % Исходя из документации NB-IoT, NSSS генерируется только в
+            % чётных фреймах.
             if mod(obj.parentFrame.frameID, 2) == 0     % чётный
                 subframeType = "NSSS";
             else    % нечётный

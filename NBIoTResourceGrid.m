@@ -1,12 +1,13 @@
 classdef NBIoTResourceGrid < handle
     %NBIoTResourceGrid NBIoT Resource grid class
+    % Здесь собирается ресурсная сетка, конфиг и генерация фреймов/сабфреймов.
 
     % Параметры ресурсной сетки
     properties (Access = public)
         Config;         % Конфиг
         frames NBIoTFrame;
         NPDSCHScheduler NBIoTNPDSCHScheduler;
-        processedBits;  % Обработанные биты, готовые к засовыванию в ресурсную сетку
+        processedBits;  % Обработанные биты, готовые к занесению в ресурсную сетку
         resourceGrid;   % Непосредственно ресурсная сетка
         NRS_shift = 0;              % Сдвиг NRS
     end
@@ -16,7 +17,7 @@ classdef NBIoTResourceGrid < handle
         totalSubcarriers = 12;          % Количество поднесущих
         totalOFDMSymbolsInSlot = 7;     % Количество OFDM-символов в одном слоте
         
-        GridGenerated = 0;         % Сгенерировали ли пустую ресурсную сетку
+        GridGenerated = 0;         % Сгенерировали ли ресурсную сетку
 
 
 
@@ -33,11 +34,11 @@ classdef NBIoTResourceGrid < handle
         defaultRNTI = 1;            % Дефолтный RNTI (получатель)
         defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH)
         default_NPDSCH_map = [0 0 1 1 1 0 1 1 1 1];     % В каких субфреймах желательно передавать NPDSCH
-        % Генерация плотностей вероятности для дефолтных кодовых слов для передачи через NPDSCH
+        % Генерация плотностей вероятности для дефолтных кодовых слов NPDSCH
         default_p1 = (sawtooth(0.01:0.01:10)+1)/2;
         default_p2 = (sin(0.01:0.01:5)+1)/2;
         
-        % Посторения кодовых слов
+        % Повторения кодовых слов
         default_cw1_rep = 3;
         default_cw2_rep = 2;
         
@@ -85,9 +86,10 @@ classdef NBIoTResourceGrid < handle
             obj.Config.NPDSCH.SIB1NBGen = obj.defaultSIB1NBGen;
             obj.Config.NPDSCH.Map = obj.default_NPDSCH_map;
 
-            obj.Config.Bits.NPDSCH_Codeword{1}.bits = double(rand(1,length(obj.default_p1)) < obj.default_p1);
+            % Пример генерации тестовых кодовых слов для NPDSCH.
+            obj.Config.Bits.NPDSCH_Codeword{1}.bits = double(rand(1, length(obj.default_p1)) < obj.default_p1);
             obj.Config.Bits.NPDSCH_Codeword{1}.Mrep = obj.default_cw1_rep;
-            obj.Config.Bits.NPDSCH_Codeword{2}.bits = double(rand(1,length(obj.default_p2)) < obj.default_p2);
+            obj.Config.Bits.NPDSCH_Codeword{2}.bits = double(rand(1, length(obj.default_p2)) < obj.default_p2);
             obj.Config.Bits.NPDSCH_Codeword{2}.Mrep = obj.default_cw2_rep;
 
 
@@ -107,18 +109,21 @@ classdef NBIoTResourceGrid < handle
         function GridGen(obj)
             %NBIoTResourceGrid Вся магия происходит после того как настроен конфиг
             
-            obj.NPDSCHScheduler = NBIoTNPDSCHScheduler(obj, obj.Config.Bits.NPDSCH_Codeword);   % Создание планировщика отправки кодовых слов
+            % Создание планировщика отправки кодовых слов NPDSCH.
+            obj.NPDSCHScheduler = NBIoTNPDSCHScheduler(obj, obj.Config.Bits.NPDSCH_Codeword);
             
 
 
-            totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
+            totalOFDMSymbols = obj.totalOFDMSymbolsInSlot ...
+                * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
             % Добавляем в ресурсную сетку "третье измерение" - индекс,
             % указывающий тип сигнала (нужно для "раскрашивания")
             
             obj.GridGenerated = 1;
             obj.resourceGrid = ones(obj.totalSubcarriers, totalOFDMSymbols, 2);
             
-            obj.NRS_shift = mod(obj.Config.NCellID, 6);     % Расчёт сдвига NRS
+            % Расчёт сдвига NRS в зависимости от NCellID.
+            obj.NRS_shift = mod(obj.Config.NCellID, 6);
             
             % Скремблирование и QPSK-модуляция битов
             scrambler_NPBCH = NBIoTScrambler(obj.Config.Bits.NPBCH, obj.Config.NCellID,"NPBCH");
@@ -146,7 +151,7 @@ classdef NBIoTResourceGrid < handle
             
             colorConfig = obj.Config.Colormap;
             
-            % Создание colormap
+            % Создание colormap (индексы совпадают с типами сигналов).
             cmap_full = [
                 colorConfig.empty;
                 colorConfig.NRS;
@@ -157,7 +162,8 @@ classdef NBIoTResourceGrid < handle
                 colorConfig.NPDCCH;
                 colorConfig.NPDSCH]./255;
             
-            x_axis = size(obj.resourceGrid(1,:,1))/(obj.slotsInSubframe*obj.totalOFDMSymbolsInSlot);
+            x_axis = size(obj.resourceGrid(1,:,1)) ...
+                / (obj.slotsInSubframe * obj.totalOFDMSymbolsInSlot);
             y_axis = 0;
             imagesc(x_axis, y_axis, obj.resourceGrid(:,:,2));
             axis xy;
@@ -167,7 +173,7 @@ classdef NBIoTResourceGrid < handle
             ylabel("Поднесущие");
             grid on;
 
-            % Этот раздел кода генерирует легенду (но всё равно багованно)
+            % Этот раздел кода генерирует легенду (но всё равно багованно).
             labels = {'Пусто','NRS','NPSS','NSSS','NPBCH','SIB1-NB','NPDCCH','NPDSCH'};
 
             present = unique(obj.resourceGrid(:,:,2));  % Находим то что присутствует     

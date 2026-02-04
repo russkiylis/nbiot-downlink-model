@@ -3,7 +3,7 @@ function subframeGrid = gen_NPDCCH(obj)
     subframeGrid = obj.subframeGrid;
 
 
-    % Раскрашивание ресурсной сетки (не забываем про NRS)
+    % Раскрашивание ресурсной сетки (не забываем про NRS).
     for subcarrier_index = 1:obj.totalSubcarriers
         if ismember(subcarrier_index, mod([0 6]+obj.parentFrame.parentGrid.NRS_shift, 12)+1)
             subframeGrid(subcarrier_index, 1:5, 2) = 7;

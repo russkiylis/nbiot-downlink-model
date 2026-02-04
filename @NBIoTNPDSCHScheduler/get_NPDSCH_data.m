@@ -2,15 +2,16 @@
 function processedData = get_NPDSCH_data(obj, frameID, subframeID)
     obj.currentFrameID = frameID;
     obj.currentSubframeID = subframeID;
-    obj.currentNS = 2.*(10.*obj.currentFrameID+obj.currentSubframeID);
+    obj.currentNS = 2 .* (10 .* obj.currentFrameID + obj.currentSubframeID);
     
-    % Если у нас новое повторение - начинаем обработку
+    % Если у нас новое повторение — начинаем обработку.
     if obj.isNewRep == true
-        % Скремблирование
-        c_init = obj.RNTI.*(2.^14) + mod(obj.currentFrameID,2).*(2.^13) + floor(obj.currentNS./2).*(2.^9) + obj.NCellID;
-        scrambledBits = NBIoTScrambler(obj.currentCW,c_init,"NPDSCH").scrambledBits;
+        % Скремблирование.
+        c_init = obj.RNTI .* (2 .^ 14) + mod(obj.currentFrameID, 2) .* (2 .^ 13) ...
+            + floor(obj.currentNS ./ 2) .* (2 .^ 9) + obj.NCellID;
+        scrambledBits = NBIoTScrambler(obj.currentCW, c_init, "NPDSCH").scrambledBits;
 
-        % Модуляция
+        % Модуляция.
         obj.currentModulatedCW = NBIoTQPSK(scrambledBits).modulatedBits;
         obj.currentModulatedCWRemain = obj.currentModulatedCW;
 
@@ -18,7 +19,7 @@ function processedData = get_NPDSCH_data(obj, frameID, subframeID)
         obj.isNewRep = false;
     end
     
-    % Вывод логов
+    % Вывод логов.
     if obj.parentGrid.Config.Logging == true
         disp(newline);
         disp("FrameID: " + obj.currentFrameID + "       SubframeID: " + obj.currentSubframeID);

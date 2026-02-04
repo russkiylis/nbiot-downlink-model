@@ -1,5 +1,6 @@
 classdef NBIoTSubframe < handle
     %NBIOTSUBFRAME NBIoT Subframe Class
+    % Здесь выбирается тип сабфрейма и строится локальная сетка.
 
     % Параметры субфрейма
     properties (SetAccess = protected)

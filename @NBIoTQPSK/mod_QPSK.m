@@ -7,7 +7,7 @@ function modulatedBits = mod_QPSK(obj)
 
     modulatedBits = zeros(1, length(bits)./2);      % Предварительное выделение памяти
     
-    a = 1;
+    a = 1;  % Индекс символа
     for i = 1:2:length(bits)
         if bits(i) == 1
             if bits(i+1) == 1
