@@ -1,7 +1,9 @@
 % Создание сигнала NPDSCH
 function subframeGrid = gen_NPDSCH(obj)
     subframeGrid = obj.subframeGrid;
-
+    
+    % Получаем то что нужно мапить
+    bitsToMap = obj.parentFrame.parentGrid.NPDSCHScheduler.get_NPDSCH_data(obj.parentFrame.frameID, obj.subframeID);
 
     % Раскрашивание ресурсной сетки (не забываем про NRS)
     for subcarrier_index = 1:obj.totalSubcarriers
@@ -16,4 +18,23 @@ function subframeGrid = gen_NPDSCH(obj)
             subframeGrid(subcarrier_index, 1:14, 2) = 8;
         end
     end
+    
+    % Маппинг элементов на ресурсную сетку
+    for subcarrier_index = 1:obj.totalSubcarriers
+        if isempty(bitsToMap)
+            break
+        end        
+        for subframe_index = 1:obj.symbolsInSubframe
+            if isempty(bitsToMap)
+                break
+            end
+            if subframeGrid(subcarrier_index,subframe_index,2) == 8
+                subframeGrid(subcarrier_index,subframe_index,1) = bitsToMap(1);
+                bitsToMap(1) = [];
+            end
+        end
+    end
+
+    % Отчёт планировщику отправки кодовых слов
+    obj.parentFrame.parentGrid.NPDSCHScheduler.sendRemainingBits(bitsToMap);
 end

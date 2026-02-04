@@ -20,6 +20,8 @@ classdef NBIoTScrambler < handle
             switch obj.signal_type
                 case "NPBCH"
                     obj.scramblingSequence = obj.gen_31GoldSequence();
+                case "NPDSCH"
+                    obj.scramblingSequence = obj.gen_31GoldSequence();
             end
 
             obj.scrambledBits = mod(obj.bits+obj.scramblingSequence,2);

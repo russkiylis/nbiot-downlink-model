@@ -1,9 +1,12 @@
-clear;
+clear; clc;
 
 grid = NBIoTResourceGrid;
-grid.Config.totalFrames = 2;
+grid.Config.Logging = true;
+grid.Config.totalFrames = 10;
 grid.Config.NCellID = 0;
 grid.Config.startFrame = 0;
+grid.Config.Bits.NPDSCH_Codeword{3}.bits = [ones(1,100) zeros(1,100)];
+grid.Config.Bits.NPDSCH_Codeword{3}.Mrep = 1;
 
 grid.GridGen();
 

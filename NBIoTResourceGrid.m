@@ -5,6 +5,7 @@ classdef NBIoTResourceGrid < handle
     properties (Access = public)
         Config;         % Конфиг
         frames NBIoTFrame;
+        NPDSCHScheduler NBIoTNPDSCHScheduler;
         processedBits;  % Обработанные биты, готовые к засовыванию в ресурсную сетку
         resourceGrid;   % Непосредственно ресурсная сетка
         NRS_shift = 0;              % Сдвиг NRS
@@ -21,6 +22,8 @@ classdef NBIoTResourceGrid < handle
 
     end
     properties (Access = private)
+        defaultLogging = false;    % Логи в консоль
+
         defaultTotalFrames = 1;    % Всего фреймов
         defaultStartFrame = 0;     % Стартовый фрейм
         defaultNCellID = 0;        % ID соты
@@ -31,8 +34,12 @@ classdef NBIoTResourceGrid < handle
         defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH)
         default_NPDSCH_map = [0 0 1 1 1 0 1 1 1 1];     % В каких субфреймах желательно передавать NPDSCH
         % Генерация плотностей вероятности для дефолтных кодовых слов для передачи через NPDSCH
-        default_p1 = (sawtooth(0:0.01:10)+1)/2;
-        default_p2 = (sin(0:0.01:5)+1)/2;
+        default_p1 = (sawtooth(0.01:0.01:10)+1)/2;
+        default_p2 = (sin(0.01:0.01:5)+1)/2;
+        
+        % Посторения кодовых слов
+        default_cw1_rep = 3;
+        default_cw2_rep = 2;
         
         default_NPDCCH_map = [0 1 0 0 0 0 0 0 0 0];     % В каких субфреймах желательно передавать NPDCCH
 
@@ -66,6 +73,8 @@ classdef NBIoTResourceGrid < handle
             %NBIoTResourceGrid Constructor
 
             % Задание стандартных значений
+            obj.Config.Logging = obj.defaultLogging;
+
             obj.Config.totalFrames = obj.defaultTotalFrames;
             obj.Config.startFrame = obj.defaultStartFrame;
             obj.Config.NCellID = obj.defaultNCellID;
@@ -75,8 +84,12 @@ classdef NBIoTResourceGrid < handle
             obj.Config.NPDSCH.RNTI = obj.defaultRNTI;
             obj.Config.NPDSCH.SIB1NBGen = obj.defaultSIB1NBGen;
             obj.Config.NPDSCH.Map = obj.default_NPDSCH_map;
-            obj.Config.Bits.NPDSCH_Codeword1 = double(rand(1,length(obj.default_p1)) < obj.default_p1);
-            obj.Config.Bits.NPDSCH_Codeword2 = double(rand(1,length(obj.default_p2)) < obj.default_p2);
+
+            obj.Config.Bits.NPDSCH_Codeword{1}.bits = double(rand(1,length(obj.default_p1)) < obj.default_p1);
+            obj.Config.Bits.NPDSCH_Codeword{1}.Mrep = obj.default_cw1_rep;
+            obj.Config.Bits.NPDSCH_Codeword{2}.bits = double(rand(1,length(obj.default_p2)) < obj.default_p2);
+            obj.Config.Bits.NPDSCH_Codeword{2}.Mrep = obj.default_cw2_rep;
+
 
             obj.Config.NPDCCH.Map = obj.default_NPDCCH_map;
 
@@ -92,7 +105,11 @@ classdef NBIoTResourceGrid < handle
         
         % Вызывать эту функцию надо после конфигурации
         function GridGen(obj)
-            %NBIoTResourceGrid Создание сетки
+            %NBIoTResourceGrid Вся магия происходит после того как настроен конфиг
+            
+            obj.NPDSCHScheduler = NBIoTNPDSCHScheduler(obj, obj.Config.Bits.NPDSCH_Codeword);   % Создание планировщика отправки кодовых слов
+            
+
 
             totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
             % Добавляем в ресурсную сетку "третье измерение" - индекс,
