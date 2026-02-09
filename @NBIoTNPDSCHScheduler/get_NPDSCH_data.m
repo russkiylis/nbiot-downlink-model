@@ -26,5 +26,6 @@ function processedData = get_NPDSCH_data(obj, frameID, subframeID)
         disp("Повторение: " + obj.currentRepCount + "       Mrep: " + obj.currentMrep);
     end
 
+
     processedData = obj.currentModulatedCWRemain;
 end
