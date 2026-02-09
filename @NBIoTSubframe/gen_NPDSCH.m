@@ -7,9 +7,19 @@ function subframeGrid = gen_NPDSCH(obj)
 
     % Получение фазового сдвига
     c_init = (obj.parentFrame.parentGrid.Config.NPDSCH.RNTI+1).*(mod(10.*obj.parentFrame.frameID+obj.subframeID,61)+1).*(2.^9)+obj.parentFrame.parentGrid.Config.NCellID;
-    scramblingSeq = NBIoTScrambler(zeros(length(bitsToMap).*2),c_init,"NPDSCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
-    
-
+    scramblingSeq = NBIoTScrambler(zeros(length(bitsToMap).*2+1),c_init,"NPDSCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
+    theta = zeros(length(bitsToMap));
+    for i = 1:length(bitsToMap)
+        if scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==0
+            theta(i)=1;
+        elseif scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==1
+            theta(i)=-1;
+        elseif scramblingSeq(2.*i)==1 && scramblingSeq(2.*i+1)==0
+            theta(i)=1i;
+        else
+            theta(i)=-1i;
+        end
+    end
 
     % Раскрашивание ресурсной сетки (не забываем про NRS)
     for subcarrier_index = 1:obj.totalSubcarriers
@@ -35,8 +45,9 @@ function subframeGrid = gen_NPDSCH(obj)
                 break
             end
             if subframeGrid(subcarrier_index,subframe_index,2) == 8
-                subframeGrid(subcarrier_index,subframe_index,1) = bitsToMap(1);
+                subframeGrid(subcarrier_index,subframe_index,1) = bitsToMap(1).*theta(1);
                 bitsToMap(1) = [];
+                theta(1) = [];
             end
         end
     end
