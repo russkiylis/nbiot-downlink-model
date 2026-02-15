@@ -31,6 +31,8 @@ classdef NBIoTSubframe < handle
 
             obj.subframeType = obj.getSubframeType();   % Выбор типа субфрейма
             obj.subframeGrid = obj.gridGen();           % Генерация ресурсной сетки субфрейма
+
+            % НРСНЯ
         end
     end
     methods (Access = protected)

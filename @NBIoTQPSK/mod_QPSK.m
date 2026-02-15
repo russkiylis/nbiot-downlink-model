@@ -15,12 +15,12 @@ function modulatedBits = mod_QPSK(obj)
                 modulatedBits(a) = (-1-1i)./sqrt(2);
             else
                 % 10
-                modulatedBits(a) = (1-1i)./sqrt(2);
+                modulatedBits(a) = (-1+1i)./sqrt(2);
             end
         else
             if bits(i+1) == 1
                 % 01
-                modulatedBits(a) = (-1+1i)./sqrt(2);
+                modulatedBits(a) = (1-1i)./sqrt(2);
             else
                 % 00
                 modulatedBits(a) = (1+1i)./sqrt(2);
