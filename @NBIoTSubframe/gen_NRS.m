@@ -18,7 +18,7 @@ function subframeGrid = gen_NRS(obj)
     for i = 1:length(NRS_coords)
         subcarrier_index = NRS_coords(i,1);
         symbol_index = NRS_coords(i,2);
-        ns = floor(symbol_index/7) + obj.subframeID.*2;   % Номер слота в фрейме
+        ns = floor((symbol_index-1)/7) + obj.subframeID.*2;   % Номер слота в фрейме
         l = mod(symbol_index,7)-1;    % Номер OFDM-символа внутри слота
         NCP = 1;    % Для нормального cyclic prefix = 1
 
