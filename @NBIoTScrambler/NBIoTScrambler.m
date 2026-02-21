@@ -22,6 +22,8 @@ classdef NBIoTScrambler < handle
                     obj.scramblingSequence = obj.gen_31GoldSequence();
                 case "NPDSCH"
                     obj.scramblingSequence = obj.gen_31GoldSequence();
+                case "NRS"
+                    obj.scramblingSequence = obj.gen_31GoldSequence();                    
             end
 
             obj.scrambledBits = mod(obj.bits+obj.scramblingSequence,2);
