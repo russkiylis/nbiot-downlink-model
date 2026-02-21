@@ -33,7 +33,9 @@ classdef NBIoTSubframe < handle
             obj.subframeGrid = obj.gridGen();           % Генерация ресурсной сетки субфрейма
 
             % НРСНЯ
-            obj.subframeGrid = obj.gen_NRS;
+            if obj.subframeType ~= "NPSS" && obj.subframeType ~= "NSSS"
+                obj.subframeGrid = obj.gen_NRS;
+            end
 
         end
     end
