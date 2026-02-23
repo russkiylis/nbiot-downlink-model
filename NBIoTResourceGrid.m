@@ -28,13 +28,16 @@ classdef NBIoTResourceGrid < handle
         defaultStartFrame = 0;     % Стартовый фрейм
         defaultNCellID = 0;        % ID соты
 
-        defaultBits_NPBCH = (square(1:1600,50)+1)/2;    % Дефолтный набор битов, передающийся в NPBCH
+        defaultBits_NPBCH = repelem([1 0], 800);    % Дефолтный набор битов, передающийся в NPBCH
+                                                    % Signal Processing
+                                                    % Toolbox 
+                                                    % (square(1:1600,50)+1)/2;
 
         defaultRNTI = 1;            % Дефолтный RNTI (получатель)
         defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH)
         default_NPDSCH_map = [0 0 1 1 1 0 1 1 1 1];     % В каких субфреймах желательно передавать NPDSCH
         % Генерация плотностей вероятности для дефолтных кодовых слов для передачи через NPDSCH
-        default_p1 = (sawtooth(0.01:0.01:10)+1)/2;
+        default_p1 = (sin(0.01:0.01:10)+1)/2 ; % Signal Processing Toolbox (sawtooth(0.01:0.01:10)+1)/2;
         default_p2 = (sin(0.01:0.01:5)+1)/2;
         
         % Посторения кодовых слов
