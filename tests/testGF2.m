@@ -42,7 +42,7 @@ classdef testGF2 < matlab.unittest.TestCase
         
         % Деление на 1
         function divide_divideByOne(testCase)
-            a = [1 0 1];
+            a = [0 1];
             b = 1;
 
             [res, rem] = GF2Pack.divide(a,b);

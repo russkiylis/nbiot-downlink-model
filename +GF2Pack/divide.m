@@ -10,6 +10,10 @@ function [result, remainder] = divide(a,b)
     elseif length(a)<length(b)
         a = [a zeros(1,length(b)-length(a))];
     end
+
+    if isempty(b)
+        error("GF2Pack:DivisionByZeroPoly", "Деление на нулевой полином!");
+    end
    
     % Выделяем место для результата
     result = zeros(1,length(a));
@@ -21,6 +25,9 @@ function [result, remainder] = divide(a,b)
         % Будем выполнять операции покуда степень делителя не будет больше степени остатка
         diff = find(fliplr(b),1)-find(fliplr(remainder),1);
         if diff <0
+            break;
+        end
+        if isempty(diff)
             break;
         end
         
