@@ -1,9 +1,5 @@
 classdef testGF2 < matlab.unittest.TestCase
     
-    properties (TestParameter)
-        test_a = struct("scalar",1,"vector",[1 1]);
-    end
-    
     methods (Test)
         % Test methods
 

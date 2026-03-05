@@ -75,6 +75,8 @@ classdef NBIoTResourceGrid < handle
         function obj = NBIoTResourceGrid()
             %NBIoTResourceGrid Constructor
 
+            addpath(genpath("Packs"));  % Добавляем паки
+
             % Задание стандартных значений
             obj.Config.Logging = obj.defaultLogging;
 
