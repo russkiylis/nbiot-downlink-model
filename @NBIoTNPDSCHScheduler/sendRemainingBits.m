@@ -24,3 +24,4 @@ function sendRemainingBits(obj, remainingBits)
     end
 
 end
+

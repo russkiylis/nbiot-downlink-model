@@ -29,3 +29,4 @@ function processedData = get_NPDSCH_data(obj, frameID, subframeID)
 
     processedData = obj.currentModulatedCWRemain;
 end
+

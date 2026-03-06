@@ -1,0 +1,6 @@
+[submodule "Packs/EssentialsPack"]
+	path = Packs/EssentialsPack
+	url = https://github.com/russkiylis/EssentialsPack.git
+[submodule "Packs/GF2Pack"]
+	path = Packs/GF2Pack
+	url = https://github.com/russkiylis/GF2Pack.git

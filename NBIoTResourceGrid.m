@@ -75,6 +75,8 @@ classdef NBIoTResourceGrid < handle
         function obj = NBIoTResourceGrid()
             %NBIoTResourceGrid Constructor
 
+            addpath(genpath("Packs"));  % Добавляем паки
+
             % Задание стандартных значений
             obj.Config.Logging = obj.defaultLogging;
 
@@ -166,7 +168,7 @@ classdef NBIoTResourceGrid < handle
             axis xy;
             yticks(0:obj.totalSubcarriers-1);
 
-            xlabel("Субфреймы");
+            xlabel("Сабфреймы");
             ylabel("Поднесущие");
             grid on;
 
@@ -178,12 +180,14 @@ classdef NBIoTResourceGrid < handle
             cmap = cmap_full(present, :);
             colormap(cmap);
 
+            
             handles = gobjects(length(present), 1);
             hold on;
             for k = 1:length(present)
-                handles(k) = patch(NaN, NaN, cmap(k,:));
+                    handles(k) = patch(NaN, NaN, cmap(k,:));
             end
-            
+            handles(6) = [];
+            legend_labels(6) = [];
             legend(handles, legend_labels);
 
         end
