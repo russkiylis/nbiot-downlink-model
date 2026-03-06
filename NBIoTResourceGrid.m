@@ -168,7 +168,7 @@ classdef NBIoTResourceGrid < handle
             axis xy;
             yticks(0:obj.totalSubcarriers-1);
 
-            xlabel("Субфреймы");
+            xlabel("Сабфреймы");
             ylabel("Поднесущие");
             grid on;
 

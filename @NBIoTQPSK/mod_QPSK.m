@@ -2,10 +2,12 @@
 function modulatedBits = mod_QPSK(obj)
     bits = obj.bits;
     if mod(length(bits),2) ~= 0
-        error("Ошибка QPSK: количество битов нечётное!");       % QPSK надобно делать для чётного количества битов
+        % QPSK надобно делать для чётного количества битов
+        error("Ошибка QPSK: количество битов нечётное!");       
     end
 
-    modulatedBits = zeros(1, length(bits)./2);      % Предварительное выделение памяти
+    % Предварительное выделение памяти
+    modulatedBits = zeros(1, length(bits)./2);     
     
     a = 1;
     for i = 1:2:length(bits)
@@ -29,3 +31,4 @@ function modulatedBits = mod_QPSK(obj)
         a = a + 1;
     end
 end
+
