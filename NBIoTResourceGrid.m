@@ -180,12 +180,14 @@ classdef NBIoTResourceGrid < handle
             cmap = cmap_full(present, :);
             colormap(cmap);
 
+            
             handles = gobjects(length(present), 1);
             hold on;
             for k = 1:length(present)
-                handles(k) = patch(NaN, NaN, cmap(k,:));
+                    handles(k) = patch(NaN, NaN, cmap(k,:));
             end
-            
+            handles(6) = [];
+            legend_labels(6) = [];
             legend(handles, legend_labels);
 
         end
