@@ -60,4 +60,13 @@ classdef testGF2 < matlab.unittest.TestCase
             end
         end
     end
+    methods (TestClassSetup)
+        
+        function classSetup1(testCase)
+            % Set up shared state for all tests.
+            addpath(genpath('../'));
+            % Tear down with testCase.addTeardown.
+        end
+        
+    end
 end
