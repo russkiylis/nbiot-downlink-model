@@ -58,7 +58,8 @@ classdef NBIoTRateMatcher < handle
             end
             
             %Меняем размерность промежуточной последовательности
-            tmp = reshape(tmp, [size(arr, 1), row_num,32]);
+            %tmp = reshape(tmp, [size(arr, 1), row_num,32]);
+            tmp = permute(reshape(tmp, [size(arr, 1), 32, row_num]), [1, 3, 2]);
             %Теперь это трехмерный массив, причем элементы 2-го измерения
             %(перемежаемая последовательность) разделены на строки и
             %столбцы (2 и 3 измерения соответственно)
@@ -180,7 +181,7 @@ classdef NBIoTRateMatcher < handle
         end
 
         function obj = NBIoTRateMatcher()
-            obj.rate_match(randi([0, 1],3, 64));
+            %obj.rate_match(randi([0, 1],3, 50));
         end
     end
 end

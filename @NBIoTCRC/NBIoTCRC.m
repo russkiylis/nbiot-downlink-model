@@ -44,10 +44,10 @@ classdef NBIoTCRC < handle
             end
 
             %Добавляем к исходному массиву CRC-биты
-            res=[arr, tmp(length(tmp)-16:length(tmp))];
+            res=[arr, tmp(length(tmp)-15:length(tmp))];
         end
         function obj = NBIoTCRC()
-            obj.crc16(randi([0, 1], 1, 34));
+            %obj.crc16(randi([0, 1], 1, 34));
         end
     end
 end
