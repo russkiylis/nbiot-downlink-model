@@ -17,10 +17,10 @@ classdef Scrambler
 		% Инициализация последовательностей
 		function initx(obj)
 			for i = 1:1600
-				next_x1 = mod(obj.x1(4) + obj.x1(1), 2);
-				next_x2 = mod(obj.x2(4) + obj.x2(3) + obj.x2(2) + obj.x2(1), 2);
-				obj.x1 = [obj.x1(2:end) next_x1];
-				obj.x2 = [obj.x2(2:end) next_x2];
+			    next_x1 = mod(obj.x1(4) + obj.x1(1), 2);
+			    next_x2 = mod(obj.x2(4) + obj.x2(3) + obj.x2(2) + obj.x2(1), 2);
+			    obj.x1 = [obj.x1(2:end) next_x1];
+			    obj.x2 = [obj.x2(2:end) next_x2];
 			end
 
 		end
