@@ -78,7 +78,7 @@ classdef NBIoTRateMatcher < handle
         end
         
         %Заполнение выходной последовательности
-        function res = bit_selection(obj, inter_seq)
+        function res = bit_selection(obj, inter_seq, length)
         %Входной массив трехмерный массив, размерами, как result в функции
         %Размеры - [len(arr, 1) ceil(len_arr/32) 32]
         %Выходной массив - одномерный массив, размер которого зависит от
@@ -89,8 +89,9 @@ classdef NBIoTRateMatcher < handle
             row_num = size(inter_seq, 2);
 
             %Размер выходной последовательности
-            len_arr = 1600;
+            len_arr = length;
             %Для NBPCH: 1600
+            %Для остальных - по разному!
             
             %Выходная последовательности
             res = zeros(1, len_arr);
@@ -176,8 +177,8 @@ classdef NBIoTRateMatcher < handle
 
         %Rate-matching делится на 2 этапа, для удобства пользования эти
         %этапы объединены данной функцией.
-        function res = rate_match(obj, arr)
-            res = obj.bit_selection(obj.interleave(arr));
+        function res = rate_match(obj, arr, length)
+            res = obj.bit_selection(obj.interleave(arr), length);
         end
 
         function obj = NBIoTRateMatcher()
