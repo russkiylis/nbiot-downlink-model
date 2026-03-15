@@ -6,6 +6,7 @@ classdef NBIoTResourceGrid < handle
         Config;         % Конфиг
         frames NBIoTFrame;
         NPDSCHScheduler NBIoTNPDSCHScheduler;
+        NPDCCHScheduler NBIoTNPDCCHScheduler;
         processedBits;  % Обработанные биты, готовые к засовыванию в ресурсную сетку
         resourceGrid;   % Непосредственно ресурсная сетка
         NRS_shift = 0;              % Сдвиг NRS
@@ -34,7 +35,7 @@ classdef NBIoTResourceGrid < handle
                                                     % (square(1:1600,50)+1)/2;
 
         defaultRNTI = 1;            % Дефолтный RNTI (получатель)
-        defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH)
+        defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH) !НЕ РЕАЛИЗОВАНО
         default_NPDSCH_map = [0 0 1 1 1 0 1 1 1 1];     % В каких субфреймах желательно передавать NPDSCH
         % Генерация плотностей вероятности для дефолтных кодовых слов для передачи через NPDSCH
         default_p1 = (sin(0.01:0.01:10)+1)/2 ; % Signal Processing Toolbox (sawtooth(0.01:0.01:10)+1)/2;
@@ -45,6 +46,16 @@ classdef NBIoTResourceGrid < handle
         default_cw2_rep = 2;
         
         default_NPDCCH_map = [0 1 0 0 0 0 0 0 0 0];     % В каких субфреймах желательно передавать NPDCCH
+        % Дефолтные биты DCI, а также их тип
+        default_DCI1 = randi([0 1], 1, 23);
+        default_DCI2 = randi([0 1], 1, 23);
+        default_DCI3 = randi([0 1], 1, 23);
+        default_DCI1_type = 0;
+        default_DCI2_type = 0;
+        default_DCI3_type = 1;
+        default_DCI1_Mrep = 2;
+        default_DCI2_Mrep = 1;
+        default_DCI3_Mrep = 3;
 
         % defaultColor_empty = [255 255 255];
         % defaultColor_NRS = [0 0 0];
@@ -97,6 +108,16 @@ classdef NBIoTResourceGrid < handle
 
 
             obj.Config.NPDCCH.Map = obj.default_NPDCCH_map;
+            obj.Config.Bits.NPDCCH_DCI{1}.bits = obj.default_DCI1;
+            obj.Config.Bits.NPDCCH_DCI{1}.type = obj.default_DCI1_type;
+            obj.Config.Bits.NPDCCH_DCI{1}.Mrep = obj.default_DCI1_Mrep;
+            obj.Config.Bits.NPDCCH_DCI{2}.bits = obj.default_DCI2;
+            obj.Config.Bits.NPDCCH_DCI{2}.type = obj.default_DCI2_type;
+            obj.Config.Bits.NPDCCH_DCI{2}.Mrep = obj.default_DCI2_Mrep;
+            obj.Config.Bits.NPDCCH_DCI{3}.bits = obj.default_DCI3;
+            obj.Config.Bits.NPDCCH_DCI{3}.type = obj.default_DCI3_type;
+            obj.Config.Bits.NPDCCH_DCI{3}.Mrep = obj.default_DCI3_Mrep;
+
 
             obj.Config.Colormap.empty = obj.defaultColor_empty;
             obj.Config.Colormap.NRS = obj.defaultColor_NRS;
@@ -113,7 +134,17 @@ classdef NBIoTResourceGrid < handle
             %NBIoTResourceGrid Вся магия происходит после того как настроен конфиг
             
             obj.NPDSCHScheduler = NBIoTNPDSCHScheduler(obj, obj.Config.Bits.NPDSCH_Codeword);   % Создание планировщика отправки кодовых слов
-            
+
+            % Предварительный CRC и tail biting для битов NPDCCH (rate
+            % matching производится в планировщике в зависимости от типа
+            % DCI)
+            for k = 1:length(obj.Config.Bits.NPDCCH_DCI)
+                obj.processedBits.NPDCCH{k}.bits = NBIoTEncoding().tail_coding(NBIoTCRC().crc16(obj.Config.Bits.NPDCCH_DCI{k}.bits));
+                obj.processedBits.NPDCCH{k}.type = obj.Config.Bits.NPDCCH_DCI{k}.type;
+                obj.processedBits.NPDCCH{k}.Mrep = obj.Config.Bits.NPDCCH_DCI{k}.Mrep;
+            end
+
+            obj.NPDCCHScheduler = NBIoTNPDCCHScheduler(obj, obj.processedBits.NPDCCH);
 
 
             totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
