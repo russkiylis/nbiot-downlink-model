@@ -58,7 +58,8 @@ classdef NBIoTRateMatcher < handle
             end
             
             %Меняем размерность промежуточной последовательности
-            tmp = reshape(tmp, [size(arr, 1), row_num,32]);
+            %tmp = reshape(tmp, [size(arr, 1), row_num,32]);
+            tmp = permute(reshape(tmp, [size(arr, 1), 32, row_num]), [1, 3, 2]);
             %Теперь это трехмерный массив, причем элементы 2-го измерения
             %(перемежаемая последовательность) разделены на строки и
             %столбцы (2 и 3 измерения соответственно)
@@ -77,7 +78,7 @@ classdef NBIoTRateMatcher < handle
         end
         
         %Заполнение выходной последовательности
-        function res = bit_selection(obj, inter_seq)
+        function res = bit_selection(obj, inter_seq, length)
         %Входной массив трехмерный массив, размерами, как result в функции
         %Размеры - [len(arr, 1) ceil(len_arr/32) 32]
         %Выходной массив - одномерный массив, размер которого зависит от
@@ -88,8 +89,9 @@ classdef NBIoTRateMatcher < handle
             row_num = size(inter_seq, 2);
 
             %Размер выходной последовательности
-            len_arr = 1600;
+            len_arr = length;
             %Для NBPCH: 1600
+            %Для остальных - по разному!
             
             %Выходная последовательности
             res = zeros(1, len_arr);
@@ -175,12 +177,12 @@ classdef NBIoTRateMatcher < handle
 
         %Rate-matching делится на 2 этапа, для удобства пользования эти
         %этапы объединены данной функцией.
-        function res = rate_match(obj, arr)
-            res = obj.bit_selection(obj.interleave(arr));
+        function res = rate_match(obj, arr, length)
+            res = obj.bit_selection(obj.interleave(arr), length);
         end
 
         function obj = NBIoTRateMatcher()
-            obj.rate_match(randi([0, 1],3, 64));
+            %obj.rate_match(randi([0, 1],3, 50));
         end
     end
 end
