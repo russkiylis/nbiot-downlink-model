@@ -31,9 +31,15 @@ classdef NBIoTScrambler < handle
             obj.scrambledBits = mod(obj.bits+obj.scramblingSequence,2);
         end
 
+        % Скремблирование с вычитанием скремблирующей последовательности
+        function rescrambledBits = scramble_seqsubstract(obj,bits)
+            rescrambledBits = mod(bits+obj.scramblingSequence(1:length(bits)),2);
+            obj.scramblingSequence(1:length(bits)) = [];
+        end
 
     end
     methods (Access = protected)
         sequence = gen_31GoldSequence(obj);
+
     end
 end

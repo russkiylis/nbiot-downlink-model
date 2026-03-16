@@ -29,10 +29,7 @@ classdef NBIoTResourceGrid < handle
         defaultStartFrame = 0;     % Стартовый фрейм
         defaultNCellID = 0;        % ID соты
 
-        defaultBits_NPBCH = repelem([1 0], 800);    % Дефолтный набор битов, передающийся в NPBCH
-                                                    % Signal Processing
-                                                    % Toolbox 
-                                                    % (square(1:1600,50)+1)/2;
+        defaultBits_NPBCH = repelem([1 0], 17);    % Дефолтный набор битов, передающийся в NPBCH
 
         defaultRNTI = 1;            % Дефолтный RNTI (получатель)
         defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH) !НЕ РЕАЛИЗОВАНО
@@ -156,8 +153,11 @@ classdef NBIoTResourceGrid < handle
             
             obj.NRS_shift = mod(obj.Config.NCellID, 6);     % Расчёт сдвига NRS
             
-            % Скремблирование и QPSK-модуляция битов
-            scrambler_NPBCH = NBIoTScrambler(obj.Config.Bits.NPBCH, obj.Config.NCellID,"NPBCH");
+            % Обработка NPBCH-битов
+            NPBCH_crc = NBIoTCRC().crc16(obj.Config.Bits.NPBCH);
+            NPBCH_encoded = NBIoTEncoding().tail_coding(NPBCH_crc);
+            NPBCH_ratematched = NBIoTRateMatcher().rate_match(NPBCH_encoded, 1600);
+            scrambler_NPBCH = NBIoTScrambler(NPBCH_ratematched, obj.Config.NCellID,"NPBCH");
             modulator_NPBCH = NBIoTQPSK(scrambler_NPBCH.scrambledBits);
             obj.processedBits.NPBCH = modulator_NPBCH.modulatedBits;
 

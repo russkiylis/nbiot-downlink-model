@@ -9,10 +9,6 @@ function data = getData(obj, FrameID, SubframeID, length1, length2)
 
     DCI0 = obj.DCI0;
     DCI1 = obj.DCI1;
-    obj.currentDCIID0;
-    obj.currentDCIID1;
-    obj.currentMrep0;
-    obj.currentMrep1;
 
     % Проверка на ожидание передачи длинного DCI
     if DCI0{obj.currentDCIID0}.type == 1 || DCI1{obj.currentDCIID1}.type == 1
@@ -39,10 +35,10 @@ function data = getData(obj, FrameID, SubframeID, length1, length2)
             end
         else
             data = NBIoTRateMatcher().rate_match(DCI1{obj.currentDCIID1}.bits, (length1+length2)*2);
-            if obj.currentMrep0 < DCI1{obj.currentDCIID1}.Mrep
-                obj.currentMrep0 = obj.currentMrep0+1;
+            if obj.currentMrep1 < DCI1{obj.currentDCIID1}.Mrep
+                obj.currentMrep1 = obj.currentMrep1+1;
             else
-                obj.currentMrep0 = 1;
+                obj.currentMrep1 = 1;
                 obj.currentDCIID1 = nextIndex(obj.currentDCIID1, length(DCI1));
                 obj.awaitingForLongDCI = 0;
             end
@@ -83,12 +79,16 @@ function data = getData(obj, FrameID, SubframeID, length1, length2)
 
         data = [data0 data1];
         
+
+
         if obj.untilNextScrambling == 1
             obj.c_init = floor(obj.currentNS/2)*(2^9)+obj.parentGrid.Config.NCellID;
             obj.untilNextScrambling = nextIndex(obj.untilNextScrambling, 4);
+            obj.scrambler = NBIoTScrambler(zeros(1,1000),obj.c_init,"NPDCCH");
         end
         
-        data = NBIoTQPSK(NBIoTScrambler(data,obj.c_init,"NPDCCH").scrambledBits).modulatedBits;
+        data = NBIoTQPSK(obj.scrambler.scramble_seqsubstract(data)).modulatedBits;
+        obj.untilNextScrambling = nextIndex(obj.untilNextScrambling,4);
 
     end
 

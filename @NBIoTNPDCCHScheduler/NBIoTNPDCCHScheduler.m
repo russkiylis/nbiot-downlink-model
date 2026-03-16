@@ -26,6 +26,7 @@ classdef NBIoTNPDCCHScheduler < handle
         whereIsLongDCI;
         
         c_init
+        scrambler
 
 
 
@@ -35,8 +36,10 @@ classdef NBIoTNPDCCHScheduler < handle
         function obj = NBIoTNPDCCHScheduler(parentGrid, DCI)
             %UNTITLED конструктор
             obj.parentGrid = parentGrid;
+
+            % Разделение DCI по разным потокам
             obj.DCI0 = DCI(1:floor(length(DCI)/2));
-            obj.DCI1 = DCI(ceil(length(DCI)/2):end);
+            obj.DCI1 = DCI(floor(length(DCI)/2)+1:end);
 
         end
 

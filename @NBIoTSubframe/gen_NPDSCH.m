@@ -8,7 +8,7 @@ function subframeGrid = gen_NPDSCH(obj)
     % Получение фазового сдвига
     c_init = (obj.parentFrame.parentGrid.Config.NPDSCH.RNTI+1).*(mod(10.*obj.parentFrame.frameID+obj.subframeID,61)+1).*(2.^9)+obj.parentFrame.parentGrid.Config.NCellID;
     scramblingSeq = NBIoTScrambler(zeros(length(bitsToMap).*2+1),c_init,"NPDSCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
-    theta = zeros(length(bitsToMap));
+    theta = zeros(1,length(bitsToMap));
     for i = 1:length(bitsToMap)
         if scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==0
             theta(i)=1;
