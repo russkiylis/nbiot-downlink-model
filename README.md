@@ -1,7 +1,7 @@
-# Модель физического уровня нисходящего канала NB-IoT
+# Модель генератора нисходящего канала NB-IoT
 Этот readme будет дорабатываться...
 
-Доброго времени бытия! Данный репозиторий — это реализация нисходящего физического уровня стандарта NB-IoT в MATLAB, опирающаяся на спецификации [3GPP TS 36.211](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2425) (физические каналы и модуляция) и [3GPP TS 36.212](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2426) (мультиплексирование и канальное кодирование).
+Доброго времени бытия! Данный репозиторий — это реализация генератора нисходящего канала стандарта NB-IoT в MATLAB, опирающаяся на спецификации [3GPP TS 36.211](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2425) (физические каналы и модуляция) и [3GPP TS 36.212](https://portal.3gpp.org/desktopmodules/Specifications/SpecificationDetails.aspx?specificationId=2426) (мультиплексирование и канальное кодирование).
 
 ## Краткая теория
 
