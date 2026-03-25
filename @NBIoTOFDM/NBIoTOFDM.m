@@ -2,20 +2,56 @@ classdef NBIoTOFDM < handle
     %UNTITLED OFDM-модулятор сигнала NB-IoT
 
     properties
-        Property1
+        resourceGrid    % Непосредственно ресурсная сетка
     end
 
     methods
-        function obj = NBIoTOFDM(inputArg1,inputArg2)
-            %UNTITLED Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+        function obj = NBIoTOFDM(resourceGrid)
+            %UNTITLED Конструктор
+            obj.resourceGrid = resourceGrid;
         end
 
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+
+        function [time, signal] = SignalGen(obj)
+            %METHOD1 Генератор сигнала
+
+            signal = [];
+
+            % Генерируем сигнал для каждого OFDM-символа
+            for l = 1:length(obj.resourceGrid(1,:,1))
+
+                % Для первого OFDM-символа в слоте длина ЦП равна 160
+                % отсчётам, иначе - 144
+                if mod(l-1,7) == 0
+                    n_cp = 160;
+                else
+                    n_cp = 144;
+                end
+                
+                n_signal = 2048;            % Количество отсчётов непосредственно сигнала
+                delta_f = 15e4;             % Частота между поднесущими
+                f_s = n_signal.*delta_f;    % Частота дискретизации
+                disp(f_s);
+                t_s = 1./f_s;               % Период дискретизации
+
+                k = -floor(12/2):ceil(12/2)-1;  % Проход по поднесущим
+                k_ = k + floor(12/2) + 1;
+                
+                time_symbol = (0:n_cp+n_signal-1).*t_s;
+                
+                OFDM_symbol = obj.resourceGrid(:,l,1);
+
+                signal_symbol = OFDM_symbol .* exp(1i.*2.*pi.*(k'+0.5).*delta_f.*(time_symbol-n_cp.*t_s));
+                signal_symbol = sum(signal_symbol,1);
+                
+                % Добавление CP
+                signal_symbol = [signal_symbol(end-n_cp+1:end) signal_symbol(n_cp+1:end)];
+                
+                signal = [signal signal_symbol]; %#ok<AGROW>
+            end
+            
+            time = (0:length(signal)-1).*t_s;
+
         end
     end
 end

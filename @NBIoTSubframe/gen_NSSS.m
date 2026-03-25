@@ -13,7 +13,11 @@ function subframeGrid = gen_NSSS(obj)
          1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1;
          1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1 -1 1 1 -1 1 -1 -1 1 1 -1 -1 1 -1 1 1 -1];
 
-    d = b(q+1, m+1) .* exp(-1i.*2.*pi.*n) .* exp(-1i.*((pi.*u.*n_.*(n_+1))./(131)));
+    d = b(q+1, m+1) .* exp(-1i.*((pi.*u.*n_.*(n_+1))./(131)));
+    % Добавление циклического сдвига, зависящего от frameID.
+    cyclic_shift = mod((((33)./(132)).*((obj.parentFrame.frameID)./2)), 4);
+    d = d .* exp(-1i.*2.*pi.*n.*cyclic_shift);
+
     d_ = [];
 
     % d - нужные значения в виде вектора. Далее мы преобразуем этот вектор
@@ -23,15 +27,11 @@ function subframeGrid = gen_NSSS(obj)
         d = d(13:end);
         d_ = [d_ cusochek];
     end
-    
-    % Добавление циклического сдвига, зависящего от frameID.
-    cyclic_shift = mod((((33)./(132)).*((obj.parentFrame.frameID)./2)), 4);
-    d__ = d_ .* exp(cyclic_shift);
 
 
     % Заполнение ресурсной сетки
     for subcarrier_index = 1:obj.totalSubcarriers
         subframeGrid(subcarrier_index, 4:14, 2) = 4;    % в сетке для "раскрашивания" NPSS - 4
-        subframeGrid(subcarrier_index, 4:14, 1) = d__(subcarrier_index, :);
+        subframeGrid(subcarrier_index, 4:14, 1) = d_(subcarrier_index, :);
     end      
 end

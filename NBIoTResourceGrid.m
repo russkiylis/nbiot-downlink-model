@@ -222,5 +222,14 @@ classdef NBIoTResourceGrid < handle
             legend(handles, legend_labels);
 
         end
+
+        function SignalGen(obj)
+            ofdm = NBIoTOFDM(obj.resourceGrid);
+            [time, signal] = ofdm.SignalGen();
+            figure;
+            plot(time, real(signal).*cos(2.*pi.*10e6.*time)+imag(signal).*(-sin(2.*pi.*10e6.*time)));
+            figure;
+            plot(abs(fftshift(fft(real(signal).*cos(2.*pi.*10e6.*time)+imag(signal).*(-sin(2.*pi.*10e6.*time))))));
+        end
     end
 end
