@@ -29,9 +29,8 @@ classdef NBIoTOFDM < handle
                 end
                 
                 n_signal = 2048;            % Количество отсчётов непосредственно сигнала
-                delta_f = 15e4;             % Частота между поднесущими
+                delta_f = 15e3;             % Частота между поднесущими
                 f_s = n_signal.*delta_f;    % Частота дискретизации
-                disp(f_s);
                 t_s = 1./f_s;               % Период дискретизации
 
                 k = -floor(12/2):ceil(12/2)-1;  % Проход по поднесущим
@@ -44,8 +43,8 @@ classdef NBIoTOFDM < handle
                 signal_symbol = OFDM_symbol .* exp(1i.*2.*pi.*(k'+0.5).*delta_f.*(time_symbol-n_cp.*t_s));
                 signal_symbol = sum(signal_symbol,1);
                 
-                % Добавление CP
-                signal_symbol = [signal_symbol(end-n_cp+1:end) signal_symbol(n_cp+1:end)];
+                % % Добавление CP
+                % signal_symbol = [signal_symbol(end-n_cp+1:end) signal_symbol(n_cp+1:end)];
                 
                 signal = [signal signal_symbol]; %#ok<AGROW>
             end
