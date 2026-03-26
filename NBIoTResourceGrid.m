@@ -10,6 +10,10 @@ classdef NBIoTResourceGrid < handle
         processedBits;  % Обработанные биты, готовые к засовыванию в ресурсную сетку
         resourceGrid;   % Непосредственно ресурсная сетка
         NRS_shift = 0;              % Сдвиг NRS
+
+        % Сигнал после OFDM
+        time;
+        signal;
     end
     properties (Access = protected)
         subframesInFrame = 10;          % Количество субфреймов в одном фрейме
@@ -18,6 +22,7 @@ classdef NBIoTResourceGrid < handle
         totalOFDMSymbolsInSlot = 7;     % Количество OFDM-символов в одном слоте
         
         GridGenerated = 0;         % Сгенерировали ли пустую ресурсную сетку
+        SignalGenerated = 0;       % Сгенерировали ли сигнал
 
 
 
@@ -180,6 +185,14 @@ classdef NBIoTResourceGrid < handle
                  error('Ресурсная сетка не сгенерирована! Используй GridGen после конфигурации!');
             end
             
+            obj.resourceGrid(1,1,2) = 2;
+            obj.resourceGrid(2,1,2) = 3;
+            obj.resourceGrid(3,1,2) = 4;
+            obj.resourceGrid(4,1,2) = 5;
+            obj.resourceGrid(5,1,2) = 6;
+            obj.resourceGrid(6,1,2) = 7;
+            obj.resourceGrid(7,1,2) = 8;
+
             colorConfig = obj.Config.Colormap;
             
             % Создание colormap
@@ -193,6 +206,8 @@ classdef NBIoTResourceGrid < handle
                 colorConfig.NPDCCH;
                 colorConfig.NPDSCH]./255;
             
+            figure(name="Ресурсная сетка Downlink NB-IoT (Standalone)");
+
             x_axis = size(obj.resourceGrid(1,:,1))/(obj.slotsInSubframe*obj.totalOFDMSymbolsInSlot);
             y_axis = 0;
             imagesc(x_axis, y_axis, obj.resourceGrid(:,:,2));
@@ -220,7 +235,66 @@ classdef NBIoTResourceGrid < handle
             handles(6) = [];
             legend_labels(6) = [];
             legend(handles, legend_labels);
+            title("Ресурсная сетка Downlink NB-IoT (Standalone)");
+            
+        end
 
+        function SignalGen(obj)
+            % Генерация сигнала методом OFDM-модуляции
+
+            if ~obj.GridGenerated
+                 error('Ресурсная сетка не сгенерирована! Используй GridGen после конфигурации!');
+            end
+
+            ofdm = NBIoTOFDM(obj.resourceGrid);
+            [obj.time, obj.signal] = ofdm.SignalGen();
+            obj.SignalGenerated = 1;
+
+            % figure;
+            % plot(time, real(signal).*cos(2.*pi.*0.*time)+imag(signal).*(-sin(2.*pi.*0.*time)));
+            % figure;
+            % semilogy(abs(fftshift(fft(real(signal).*cos(2.*pi.*0.*time)+imag(signal).*(-sin(2.*pi.*0.*time))))));
+        end
+
+        function showSignal(obj, f0)
+            % Вывод сигнала во временной области
+            % f0 - несущая частота
+
+            if ~obj.SignalGenerated
+                 error('Сигнал не сгенерирован! Используй SignalGen после генерации сетки!');
+            end
+
+            figure(name="Сигнал Downlink NB-IoT во временной области (f0 = "+f0.*1e-3+" кГц)");
+            plot(obj.time, real(obj.signal).*cos(2.*pi.*f0.*obj.time)+imag(obj.signal).*(-sin(2.*pi.*f0.*obj.time)));
+            title("Сигнал Downlink NB-IoT во временной области (f0 = "+f0.*1e-3+" кГц)");
+            grid on;
+            xlabel("t, с");
+            ylabel("u, В");
+        end
+
+        function showSpectr(obj, f0)
+            % Вывод сигнала во частотной
+            % f0 - несущая частота
+
+            if ~obj.SignalGenerated
+                 error('Сигнал не сгенерирован! Используй SignalGen после генерации сетки!');
+            end
+
+            figure(name="Амплитудный спектр Downlink NB-IoT (f0 = "+f0.*1e-3+" кГц)");
+            
+            s = real(obj.signal).*cos(2.*pi.*f0.*obj.time)+imag(obj.signal).*(-sin(2.*pi.*f0.*obj.time));
+            A = abs(fftshift(fft(s)));
+            N = length(s);
+            f = (-N/2 : N/2-1) .* (1./obj.time(2)) ./ N .*1e-3;
+
+            plot(f,A);
+            title("Амплитудный спектр Downlink NB-IoT (f0 = "+f0.*1e-3+" кГц)");
+            grid on;
+            xlabel("f, кГц");
+            ylabel("u, В/Гц");
+            xlim([f0.*1e-3-200 f0.*1e-3+200]);
+            xline(f0.*1e-3-90, '--',f0.*1e-3-90+" кГц");
+            xline(f0.*1e-3+90, '--',f0.*1e-3+90+" кГц");
         end
     end
 end
