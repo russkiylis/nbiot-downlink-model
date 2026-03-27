@@ -40,12 +40,16 @@ classdef NBIoTResourceGrid < handle
         defaultSIB1NBGen = false;   % Есть ли генерация SIB1NB (NPDSCH, несущее BCCH) !НЕ РЕАЛИЗОВАНО
         default_NPDSCH_map = [0 0 1 1 1 0 1 1 1 1];     % В каких субфреймах желательно передавать NPDSCH
         % Генерация плотностей вероятности для дефолтных кодовых слов для передачи через NPDSCH
-        default_p1 = (sin(0.01:0.01:10)+1)/2 ; % Signal Processing Toolbox (sawtooth(0.01:0.01:10)+1)/2;
-        default_p2 = (sin(0.01:0.01:5)+1)/2;
+        default_p1 = (sin(0.1:0.1:10)+1)/2 ; % Signal Processing Toolbox (sawtooth(0.01:0.01:10)+1)/2;
+        default_p2 = (sin(0.1:0.1:30)+1)/2;
         
         % Посторения кодовых слов
         default_cw1_rep = 3;
         default_cw2_rep = 2;
+
+        % Сколько сабфреймов занимает кодовое слово
+        default_cw1_subframes = 2;
+        default_cw2_subframes = 3;
         
         default_NPDCCH_map = [0 1 0 0 0 0 0 0 0 0];     % В каких субфреймах желательно передавать NPDCCH
         % Дефолтные биты DCI, а также их тип
@@ -105,8 +109,10 @@ classdef NBIoTResourceGrid < handle
 
             obj.Config.Bits.NPDSCH_Codeword{1}.bits = double(rand(1,length(obj.default_p1)) < obj.default_p1);
             obj.Config.Bits.NPDSCH_Codeword{1}.Mrep = obj.default_cw1_rep;
+            obj.Config.Bits.NPDSCH_Codeword{1}.nSF  = obj.default_cw1_subframes;
             obj.Config.Bits.NPDSCH_Codeword{2}.bits = double(rand(1,length(obj.default_p2)) < obj.default_p2);
             obj.Config.Bits.NPDSCH_Codeword{2}.Mrep = obj.default_cw2_rep;
+            obj.Config.Bits.NPDSCH_Codeword{2}.nSF  = obj.default_cw2_subframes;
 
 
             obj.Config.NPDCCH.Map = obj.default_NPDCCH_map;
@@ -135,7 +141,16 @@ classdef NBIoTResourceGrid < handle
         function GridGen(obj)
             %NBIoTResourceGrid Вся магия происходит после того как настроен конфиг
             
-            obj.NPDSCHScheduler = NBIoTNPDSCHScheduler(obj, obj.Config.Bits.NPDSCH_Codeword);   % Создание планировщика отправки кодовых слов
+            % Предварительный CRC и tail biting для битов NPDSCH (rate
+            % matching производится в планировщике в зависимости от
+            % количества сабфреймов для одного кодового слова
+            for k = 1:length(obj.Config.Bits.NPDSCH_Codeword)
+                obj.processedBits.NPDSCH{k}.bits = NBIoTEncoding().tail_coding(NBIoTCRC().crc16(obj.Config.Bits.NPDSCH_Codeword{k}.bits));
+                obj.processedBits.NPDSCH{k}.Mrep = obj.Config.Bits.NPDSCH_Codeword{k}.Mrep;
+                obj.processedBits.NPDSCH{k}.nSF = obj.Config.Bits.NPDSCH_Codeword{k}.nSF;
+            end
+
+            obj.NPDSCHScheduler = NBIoTNPDSCHScheduler(obj, obj.processedBits.NPDSCH);   % Создание планировщика отправки кодовых слов
 
             % Предварительный CRC и tail biting для битов NPDCCH (rate
             % matching производится в планировщике в зависимости от типа
