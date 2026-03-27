@@ -28,11 +28,11 @@ function subframeGrid = gen_NPDSCH(obj)
     scramblingSeq = NBIoTScrambler(zeros(length(bitsToMap).*2+1),c_init,"NPDSCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
     theta = zeros(1,length(bitsToMap));
     for i = 1:length(bitsToMap)
-        if scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==0
+        if scramblingSeq(2.*i-1)==0 && scramblingSeq(2.*i)==0
             theta(i)=1;
-        elseif scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==1
+        elseif scramblingSeq(2.*i-1)==0 && scramblingSeq(2.*i)==1
             theta(i)=-1;
-        elseif scramblingSeq(2.*i)==1 && scramblingSeq(2.*i+1)==0
+        elseif scramblingSeq(2.*i-1)==1 && scramblingSeq(2.*i)==0
             theta(i)=1i;
         else
             theta(i)=-1i;
