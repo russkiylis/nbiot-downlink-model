@@ -22,6 +22,7 @@ classdef NBIoTNPDSCHScheduler < handle
         currentCWID = 1             % Текущее передающееся кодовое слово (ID)
         currentMrep                 % Текущее количество повторений
         currentRepCount = 1         % Сколько уже повторилось
+        current_nSF                 % Количество сабфреймов для передачи CW
     end
 
     methods (Access = public)
@@ -34,9 +35,10 @@ classdef NBIoTNPDSCHScheduler < handle
 
             obj.currentCW = obj.CW{obj.currentCWID}.bits;
             obj.currentMrep = min(obj.CW{obj.currentCWID}.Mrep,4);
+            obj.current_nSF = obj.CW{obj.currentCWID}.nSF;
         end
 
-        processedData = get_NPDSCH_data(obj, frameID, subframeID)
+        processedData = get_NPDSCH_data(obj, frameID, subframeID, RE_available)
         sendRemainingBits(obj, remainingBits)
     end
 end

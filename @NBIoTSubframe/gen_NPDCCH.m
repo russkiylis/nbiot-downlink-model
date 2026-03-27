@@ -42,11 +42,11 @@ function subframeGrid = gen_NPDCCH(obj)
     scramblingSeq = NBIoTScrambler(zeros(1,length(data).*2+1),c_init,"NPDCCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
     theta = zeros(1,length(data));
     for i = 1:length(data)
-        if scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==0
+        if scramblingSeq(2.*i-1)==0 && scramblingSeq(2.*i)==0
             theta(i)=1;
-        elseif scramblingSeq(2.*i)==0 && scramblingSeq(2.*i+1)==1
+        elseif scramblingSeq(2.*i-1)==0 && scramblingSeq(2.*i)==1
             theta(i)=-1;
-        elseif scramblingSeq(2.*i)==1 && scramblingSeq(2.*i+1)==0
+        elseif scramblingSeq(2.*i-1)==1 && scramblingSeq(2.*i)==0
             theta(i)=1i;
         else
             theta(i)=-1i;

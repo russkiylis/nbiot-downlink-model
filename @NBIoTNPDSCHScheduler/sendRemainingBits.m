@@ -15,6 +15,7 @@ function sendRemainingBits(obj, remainingBits)
 
             obj.currentCW = obj.CW{obj.currentCWID}.bits;
             obj.currentMrep = min(obj.CW{obj.currentCWID}.Mrep,4);
+            obj.current_nSF = obj.CW{obj.currentCWID}.nSF;
 
             obj.currentRepCount = 1;
         else

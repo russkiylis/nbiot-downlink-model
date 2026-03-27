@@ -36,13 +36,13 @@ classdef NBIoTFrame < handle
             for i = 1:K
                 % Создание переменной theta
                 if cf(2.*(i-1)+1) == 0 && cf(2.*(i-1)+2) == 0
-                    theta(i) = 0;
+                    theta(i) = 1;
                 elseif cf(2.*(i-1)+1) == 0 && cf(2.*(i-1)+2) == 1
-                    theta(i) = 1;
+                    theta(i) = -1;
                 elseif cf(2.*(i-1)+1) == 1 && cf(2.*(i-1)+2) == 0
-                    theta(i) = 0;
+                    theta(i) = 1i;
                 elseif cf(2.*(i-1)+1) == 1 && cf(2.*(i-1)+2) == 1
-                    theta(i) = 1;
+                    theta(i) = -1i;
                 end
                 
                 % Создание битов, готовых к занесению
