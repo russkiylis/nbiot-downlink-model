@@ -34,7 +34,6 @@ classdef NBIoTOFDM < handle
                 t_s = 1./f_s;               % Период дискретизации
 
                 k = -floor(12/2):ceil(12/2)-1;  % Проход по поднесущим
-                k_ = k + floor(12/2) + 1;
                 
                 time_symbol = (0:n_cp+n_signal-1).*t_s;
                 

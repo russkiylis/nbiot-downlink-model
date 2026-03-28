@@ -38,7 +38,7 @@ function subframeGrid = gen_NPDCCH(obj)
 
     % Получение фазового сдвига
     currentNS = 2.*(10.*obj.parentFrame.frameID+obj.subframeID);
-    c_init = (obj.parentFrame.parentGrid.Config.NCellID+1)*(mod(10*obj.parentFrame.frameID+floor(currentNS/2),8192)+1)*(2^9)+obj.parentFrame.parentGrid.Config.NCellID;
+    c_init = (obj.parentFrame.parentGrid.Config.NCellID+1)*(mod(10*obj.parentFrame.frameID+obj.subframeID,8192)+1)*(2^9)+obj.parentFrame.parentGrid.Config.NCellID;
     scramblingSeq = NBIoTScrambler(zeros(1,length(data).*2+1),c_init,"NPDCCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
     theta = zeros(1,length(data));
     for i = 1:length(data)

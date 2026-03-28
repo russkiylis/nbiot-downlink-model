@@ -1,6 +1,7 @@
 % Создание сигнала NPDSCH
 function subframeGrid = gen_NPDSCH(obj)
     subframeGrid = obj.subframeGrid;
+    currentNS = 2.*(10.*obj.parentFrame.frameID+obj.subframeID);
     
     RE_available = 0;
     % Раскрашивание ресурсной сетки (не забываем про NRS)
@@ -24,7 +25,7 @@ function subframeGrid = gen_NPDSCH(obj)
     bitsToMap = obj.parentFrame.parentGrid.NPDSCHScheduler.get_NPDSCH_data(obj.parentFrame.frameID, obj.subframeID, RE_available);
 
     % Получение фазового сдвига
-    c_init = (obj.parentFrame.parentGrid.Config.NPDSCH.RNTI+1).*(mod(10.*obj.parentFrame.frameID+obj.subframeID,61)+1).*(2.^9)+obj.parentFrame.parentGrid.Config.NCellID;
+    c_init = (obj.parentFrame.parentGrid.Config.NPDSCH.RNTI+1).*(mod(10.*obj.parentFrame.frameID+floor(currentNS/2),61)+1).*(2.^9)+obj.parentFrame.parentGrid.Config.NCellID;
     scramblingSeq = NBIoTScrambler(zeros(length(bitsToMap).*2+1),c_init,"NPDSCH").scramblingSequence;   % Не играет роли, какие биты подаем на вход, только количество
     theta = zeros(1,length(bitsToMap));
     for i = 1:length(bitsToMap)

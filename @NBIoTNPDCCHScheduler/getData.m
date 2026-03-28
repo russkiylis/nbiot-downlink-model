@@ -82,7 +82,7 @@ function data = getData(obj, FrameID, SubframeID, length1, length2)
 
 
         if obj.untilNextScrambling == 1
-            obj.c_init = floor(obj.currentNS/2)*(2^9)+obj.parentGrid.Config.NCellID;
+            obj.c_init = obj.currentSubframeID*(2^9)+obj.parentGrid.Config.NCellID;
             obj.untilNextScrambling = nextIndex(obj.untilNextScrambling, 4);
             obj.scrambler = NBIoTScrambler(zeros(1,1000),obj.c_init,"NPDCCH");
         end

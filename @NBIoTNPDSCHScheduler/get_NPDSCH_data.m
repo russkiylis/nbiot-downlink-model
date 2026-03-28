@@ -18,7 +18,7 @@ function processedData = get_NPDSCH_data(obj, frameID, subframeID, RE_available)
         rate_matched_CW = NBIoTRateMatcher().rate_match(obj.currentCW,n_bits);
 
         % Скремблирование
-        c_init = obj.RNTI.*(2.^14) + mod(obj.currentFrameID,2).*(2.^13) + floor(obj.currentNS./2).*(2.^9) + obj.NCellID;
+        c_init = obj.RNTI.*(2.^14) + mod(obj.currentFrameID,2).*(2.^13) + obj.currentSubframeID.*(2.^9) + obj.NCellID;
         scrambledBits = NBIoTScrambler(rate_matched_CW,c_init,"NPDSCH").scrambledBits;
 
         % Модуляция

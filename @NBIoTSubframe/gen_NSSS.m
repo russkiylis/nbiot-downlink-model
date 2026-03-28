@@ -31,7 +31,7 @@ function subframeGrid = gen_NSSS(obj)
 
     % Заполнение ресурсной сетки
     for subcarrier_index = 1:obj.totalSubcarriers
-        subframeGrid(subcarrier_index, 4:14, 2) = 4;    % в сетке для "раскрашивания" NPSS - 4
+        subframeGrid(subcarrier_index, 4:14, 2) = 4;    % в сетке для "раскрашивания" NSSS - 4
         subframeGrid(subcarrier_index, 4:14, 1) = d_(subcarrier_index, :);
     end      
 end
