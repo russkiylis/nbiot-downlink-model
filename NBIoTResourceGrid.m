@@ -141,6 +141,11 @@ classdef NBIoTResourceGrid < handle
         function GridGen(obj)
             %NBIoTResourceGrid Вся магия происходит после того как настроен конфиг
             
+            if obj.Config.Logging == true
+                gridgen_tic = tic;
+                disp("[GridGen] Начало генерации: " + obj.Config.totalFrames + " фреймов, начиная с фрейма " + obj.Config.startFrame);
+            end
+
             % Предварительный CRC и tail biting для битов NPDSCH (rate
             % matching производится в планировщике в зависимости от
             % количества сабфреймов для одного кодового слова
@@ -163,6 +168,9 @@ classdef NBIoTResourceGrid < handle
 
             obj.NPDCCHScheduler = NBIoTNPDCCHScheduler(obj, obj.processedBits.NPDCCH);
 
+            if obj.Config.Logging == true
+                disp("[GridGen] Обработка битов завершена. NPDSCH CW: " + length(obj.Config.Bits.NPDSCH_Codeword) + ", NPDCCH DCI: " + length(obj.Config.Bits.NPDCCH_DCI));
+            end
 
             totalOFDMSymbols = obj.totalOFDMSymbolsInSlot * obj.slotsInSubframe * obj.subframesInFrame * obj.Config.totalFrames;
             % Добавляем в ресурсную сетку "третье измерение" - индекс,
@@ -190,7 +198,10 @@ classdef NBIoTResourceGrid < handle
             % Соединение фреймов
             grids = {obj.frames.frameGrid};
             obj.resourceGrid = cat(2, grids{:});
-                
+
+            if obj.Config.Logging == true
+                disp("[GridGen] Генерация ресурсной сетки завершена. Время: " + toc(gridgen_tic) + " с");
+            end
 
         end
 
@@ -261,9 +272,18 @@ classdef NBIoTResourceGrid < handle
                  error('Ресурсная сетка не сгенерирована! Используй GridGen после конфигурации!');
             end
 
+            if obj.Config.Logging == true
+                signalgen_tic = tic;
+                disp(newline + "[SignalGen] Начало OFDM-модуляции...");
+            end
+
             ofdm = NBIoTOFDM(obj.resourceGrid);
             [obj.time, obj.signal] = ofdm.SignalGen();
             obj.SignalGenerated = 1;
+
+            if obj.Config.Logging == true
+                disp("[SignalGen] OFDM-модуляция завершена. Время: " + toc(signalgen_tic) + " с");
+            end
 
             % figure;
             % plot(time, real(signal).*cos(2.*pi.*0.*time)+imag(signal).*(-sin(2.*pi.*0.*time)));
@@ -279,12 +299,21 @@ classdef NBIoTResourceGrid < handle
                  error('Сигнал не сгенерирован! Используй SignalGen после генерации сетки!');
             end
 
+            if obj.Config.Logging == true
+                showsignal_tic = tic;
+                disp(newline + "[showSignal] Построение сигнала (f0 = " + f0.*1e-3 + " кГц)...");
+            end
+
             figure(name="Сигнал Downlink NB-IoT во временной области (f0 = "+f0.*1e-3+" кГц)");
             plot(obj.time, real(obj.signal).*cos(2.*pi.*f0.*obj.time)+imag(obj.signal).*(-sin(2.*pi.*f0.*obj.time)));
             title("Сигнал Downlink NB-IoT во временной области (f0 = "+f0.*1e-3+" кГц)");
             grid on;
             xlabel("t, с");
             ylabel("u, В");
+
+            if obj.Config.Logging == true
+                disp("[showSignal] Готово. Время: " + toc(showsignal_tic) + " с");
+            end
         end
 
         function showSpectr(obj, f0)
@@ -295,8 +324,13 @@ classdef NBIoTResourceGrid < handle
                  error('Сигнал не сгенерирован! Используй SignalGen после генерации сетки!');
             end
 
+            if obj.Config.Logging == true
+                showspectr_tic = tic;
+                disp(newline + "[showSpectr] Построение спектра (f0 = " + f0.*1e-3 + " кГц)...");
+            end
+
             figure(name="Амплитудный спектр Downlink NB-IoT (f0 = "+f0.*1e-3+" кГц)");
-            
+
             s = real(obj.signal).*cos(2.*pi.*f0.*obj.time)+imag(obj.signal).*(-sin(2.*pi.*f0.*obj.time));
             A = abs(fftshift(fft(s)));
             N = length(s);
@@ -310,6 +344,10 @@ classdef NBIoTResourceGrid < handle
             xlim([f0.*1e-3-200 f0.*1e-3+200]);
             xline(f0.*1e-3-90, '--',f0.*1e-3-90+" кГц");
             xline(f0.*1e-3+90, '--',f0.*1e-3+90+" кГц");
+
+            if obj.Config.Logging == true
+                disp("[showSpectr] Готово. Время: " + toc(showspectr_tic) + " с");
+            end
         end
     end
 end

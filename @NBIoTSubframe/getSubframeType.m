@@ -90,3 +90,8 @@ function subframeType = getSubframeType(obj)
                 end
             end
     end
+
+    % Вывод логов
+    if obj.parentFrame.parentGrid.Config.Logging == true
+        disp(newline + "[Сабфрейм] FrameID: " + obj.parentFrame.frameID + "  SubframeID: " + obj.subframeID + "  Тип: " + subframeType);
+    end

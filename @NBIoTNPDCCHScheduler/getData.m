@@ -43,6 +43,13 @@ function data = getData(obj, FrameID, SubframeID, length1, length2)
                 obj.awaitingForLongDCI = 0;
             end
         end
+
+        % Вывод логов (long DCI)
+        if obj.parentGrid.Config.Logging == true
+            disp("Режим: Long DCI (NCCE" + obj.whereIsLongDCI + ")");
+            disp("NCCE0 — DCI ID: " + obj.currentDCIID0 + "     Повторение: " + obj.currentMrep0);
+            disp("NCCE1 — DCI ID: " + obj.currentDCIID1 + "     Повторение: " + obj.currentMrep1);
+        end
     else
         % Обработка 1 NCCE (маленькое)
         if obj.ended_DCI0 == 1 && obj.awaitingForLongDCI == 1
@@ -78,8 +85,12 @@ function data = getData(obj, FrameID, SubframeID, length1, length2)
         end
 
         data = [data0 data1];
-        
 
+        % Вывод логов
+        if obj.parentGrid.Config.Logging == true
+            disp("NCCE0 — DCI ID: " + obj.currentDCIID0 + "     Повторение: " + obj.currentMrep0);
+            disp("NCCE1 — DCI ID: " + obj.currentDCIID1 + "     Повторение: " + obj.currentMrep1);
+        end
 
         if obj.untilNextScrambling == 1
             obj.c_init = obj.currentSubframeID*(2^9)+obj.parentGrid.Config.NCellID;

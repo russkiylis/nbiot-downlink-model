@@ -31,8 +31,6 @@ function processedData = get_NPDSCH_data(obj, frameID, subframeID, RE_available)
     
     % Вывод логов
     if obj.parentGrid.Config.Logging == true
-        disp(newline);
-        disp("FrameID: " + obj.currentFrameID + "       SubframeID: " + obj.currentSubframeID);
         disp("CWID: " + obj.currentCWID + "     Осталось передать: " + length(obj.currentModulatedCWRemain));
         disp("Повторение: " + obj.currentRepCount + "       Mrep: " + obj.currentMrep);
     end

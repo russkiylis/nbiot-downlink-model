@@ -18,9 +18,17 @@ function sendRemainingBits(obj, remainingBits)
             obj.current_nSF = obj.CW{obj.currentCWID}.nSF;
 
             obj.currentRepCount = 1;
+
+            if obj.parentGrid.Config.Logging == true
+                disp("[NPDSCH] Переход к новому CW: CWID = " + obj.currentCWID + ", Mrep = " + obj.currentMrep);
+            end
         else
             % Если кодовое слово нужно повторить
             obj.isNewRep = true;
+
+            if obj.parentGrid.Config.Logging == true
+                disp("[NPDSCH] Новое повторение CW: CWID = " + obj.currentCWID + ", повторение " + obj.currentRepCount + "/" + obj.currentMrep);
+            end
         end
     end
 
