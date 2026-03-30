@@ -226,4 +226,114 @@ classdef testAll < matlab.unittest.TestCase
             fprintf('====================================\n');
         end
     end
+    methods(Test)
+        function testNPSSML(testCase)
+            grid = NBIoTResourceGrid;
+            grid.Config.Logging = true;
+            grid.Config.totalFrames = 3;
+            grid.Config.NCellID = 300;
+            grid.Config.startFrame = 0;
+            grid.Config.Bits.NPDSCH_Codeword{3}.bits = [ones(1,100) zeros(1,100)];
+            grid.Config.Bits.NPDSCH_Codeword{3}.Mrep = 1;
+            grid.Config.Bits.NPDSCH_Codeword{3}.nSF = 10;
+            grid.Config.Bits.NPDCCH_DCI{4}.bits = ones(1,23);
+            grid.Config.Bits.NPDCCH_DCI{4}.type = 0;
+            grid.Config.Bits.NPDCCH_DCI{4}.Mrep = 1;
+            grid.GridGen();
+            frame = NBIoTFrame(grid, 0);
+            subframe = NBIoTSubframe(frame, 0);
+            res1 = gen_NPSS(subframe);
+            res1_npss = res1(1:11, 4:14, 1);
+            enb = struct('OperationMode', 'Standalone', 'NSubframe', 5);
+            res2 = lteNPSS(enb);
+            testCase.verifyEqual(res1_npss(:), res2(res2 ~= 0), 'AbsTol', 1e-10, 'Не совпадают');
+            %Замер времени
+            f1 = @() gen_NPSS(subframe);
+            f2 = @() lteNPSS(enb);
+
+            t1 = timeit(f1);
+            t2 = timeit(f2);
+    
+            fprintf('\n========== testNPSSML ==========\n');
+            fprintf('f1 (MATLAB NPSS): %.6f сек\n', t1);
+            fprintf('f2 (NBIoT NPSS):  %.6f сек\n', t2);
+            fprintf('Отношение f1/f2:  %.2f\n', t1/t2);
+            fprintf('====================================\n');
+        end
+    end
+    methods(Test)
+        function testNSSSML(testCase)
+            grid = NBIoTResourceGrid;
+            grid.Config.Logging = true;
+            grid.Config.totalFrames = 3;
+            grid.Config.NCellID = 100;
+            grid.Config.startFrame = 0;
+            grid.Config.Bits.NPDSCH_Codeword{3}.bits = [ones(1,100) zeros(1,100)];
+            grid.Config.Bits.NPDSCH_Codeword{3}.Mrep = 1;
+            grid.Config.Bits.NPDSCH_Codeword{3}.nSF = 10;
+            grid.Config.Bits.NPDCCH_DCI{4}.bits = ones(1,23);
+            grid.Config.Bits.NPDCCH_DCI{4}.type = 0;
+            grid.Config.Bits.NPDCCH_DCI{4}.Mrep = 1;
+            grid.GridGen();
+            frame = NBIoTFrame(grid, 0);
+            subframe = NBIoTSubframe(frame, 9);
+            res1 = gen_NSSS(subframe);
+            res1_nsss = res1(:, 4:14, 1);
+            enb = struct();
+            enb.OperationMode = 'Standalone';
+            enb.NSubframe = 9;
+            enb.NNCellID = 100;
+            res2 = lteNSSS(enb);
+            testCase.verifyEqual(conj(res1_nsss(:)), res2, 'AbsTol', 1e-10, 'Не совпадают');
+            f1 = @() gen_NSSS(subframe);
+            f2 = @() lteNSSS(enb);
+
+            t1 = timeit(f1);
+            t2 = timeit(f2);
+    
+            fprintf('\n========== testNSSSML ==========\n');
+            fprintf('f1 (MATLAB NSSS): %.6f сек\n', t1);
+            fprintf('f2 (NBIoT NSSS):  %.6f сек\n', t2);
+            fprintf('Отношение f1/f2:  %.2f\n', t1/t2);
+            fprintf('====================================\n');
+        end
+    end
+    methods(Test)
+        function testNRSML(testCase)
+            grid = NBIoTResourceGrid;
+            grid.Config.Logging = true;
+            grid.Config.totalFrames = 3;
+            grid.Config.NCellID = 100;
+            grid.Config.startFrame = 0;
+            grid.Config.Bits.NPDSCH_Codeword{3}.bits = [ones(1,100) zeros(1,100)];
+            grid.Config.Bits.NPDSCH_Codeword{3}.Mrep = 1;
+            grid.Config.Bits.NPDSCH_Codeword{3}.nSF = 10;
+            grid.Config.Bits.NPDCCH_DCI{4}.bits = ones(1,23);
+            grid.Config.Bits.NPDCCH_DCI{4}.type = 0;
+            grid.Config.Bits.NPDCCH_DCI{4}.Mrep = 1;
+            grid.GridGen();
+            frame = NBIoTFrame(grid, 0);
+            subframe = NBIoTSubframe(frame, 0);
+            res1 = gen_NRS(subframe);
+            enb = struct('NNCellID', 100, 'NBRefP', 1, 'NSubframe', 0);
+            res2 = lteNRS(enb);
+            idx = lteNRSIndices(enb, 'sub');
+            toolbox_grid = zeros(12, 14, 2);
+            for i = 1:length(res2)
+                toolbox_grid(idx(i,1)+1, idx(i,2)+1, idx(i,3)+1) = res2(i);  % ← было sym(i)
+            end
+            testCase.verifyEqual(res1(:,:,1), toolbox_grid(:,:,1), 'Не совпадают');
+            f1 = @() gen_NRS(subframe);
+            f2 = @() lteNRS(enb);
+
+            t1 = timeit(f1);
+            t2 = timeit(f2);
+    
+            fprintf('\n========== testNSSSML ==========\n');
+            fprintf('f1 (MATLAB NRS): %.6f сек\n', t1);
+            fprintf('f2 (NBIoT NRS):  %.6f сек\n', t2);
+            fprintf('Отношение f1/f2:  %.2f\n', t1/t2);
+            fprintf('====================================\n');
+        end
+    end
 end

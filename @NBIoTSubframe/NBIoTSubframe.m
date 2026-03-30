@@ -39,7 +39,7 @@ classdef NBIoTSubframe < handle
 
         end
     end
-    methods (Access = protected)
+    methods (Access = public)
         subframeType = getSubframeType(obj)     % Выбор типа субфрейма
         subframeGrid = gridGen(obj)             % Генерация ресурсной сетки субфрейма
 
