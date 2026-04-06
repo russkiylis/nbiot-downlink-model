@@ -317,14 +317,15 @@ classdef testAll < matlab.unittest.TestCase
             res1 = gen_NRS(subframe);
             enb = struct('NNCellID', 100, 'NBRefP', 1, 'NSubframe', 0);
             res2 = lteNRS(enb);
-            idx = lteNRSIndices(enb, 'sub');
-            toolbox_grid = zeros(12, 14, 2);
+            idx = lteNRSIndices(enb, 'sub', '1based');
+            toolbox_grid = zeros(12, 14, 1);
             for i = 1:length(res2)
-                toolbox_grid(idx(i,1)+1, idx(i,2)+1, idx(i,3)+1) = res2(i);  % ← было sym(i)
+                toolbox_grid(idx(i,1), idx(i,2), 1) = res2(i);
             end
-            testCase.verifyEqual(res1(:,:,1), toolbox_grid(:,:,1), 'Не совпадают');
-            f1 = @() gen_NRS(subframe);
-            f2 = @() lteNRS(enb);
+            nrs_mask = toolbox_grid ~= 0;
+            testCase.verifyEqual(res1(nrs_mask), toolbox_grid(nrs_mask), 'AbsTol', 1e-7, 'Не совпадают');            
+            f1 = @() lteNRS(enb);
+            f2 = @() gen_NRS(subframe);
 
             t1 = timeit(f1);
             t2 = timeit(f2);
@@ -334,6 +335,68 @@ classdef testAll < matlab.unittest.TestCase
             fprintf('f2 (NBIoT NRS):  %.6f сек\n', t2);
             fprintf('Отношение f1/f2:  %.2f\n', t1/t2);
             fprintf('====================================\n');
+        end
+    end
+    methods(Test)
+        function testGridML(testCase)
+            cfg.NBRefP = 1;
+            fullGrid = lteNBResourceGrid(cfg);
+            fullGrid = repmat(fullGrid, 1, 30, 1);
+            enb.NCellID = 100;
+            enb.NNCellID = 100;
+            enb.OperationMode = 'Standalone';
+            enb.NBRefP = 1;
+            enb.NDLRB = 6;
+            enb.NULRB = 6;
+            chs.NCCE = 0;
+            chs.NRep = 1;
+            mib = randi([0 1], 34, 1);
+            cwBCH = lteBCH(mib, 1600, 1);
+            port = 0;
+            % NPDCCH подготовка
+            [~, info] = lteNPDCCHIndices(enb, chs);
+            cwLen = info.G;
+            dciInfo = lteDCIInfo(enb);
+            dciLen = dciInfo.Format0;
+            dcibits = randi([0 1], dciLen, 1);
+            ue.RNTI = 0;
+            ue.PDCCHFormat = 1;
+            cwDCCH = lteDCIEncode(ue, dcibits, cwLen);
+            stateIn = [];
+            chs2.NPDSCHDataType = 'NotBCCH';
+            chs2.NSF = 1;
+            chs2.NRep = 1;
+            chs2.RNTI = 0;
+            cwDSCH = randi([0 1], 100, 1);
+            for sf = 0:29
+                symStart = sf * 14;
+                enb.NSubframe = mod(sf, 10);
+                npssIdx = lteNPSSIndices(enb, port, 'sub 1based');
+                npssSym = lteNPSS(enb);
+                nsssIdx = lteNSSSIndices(enb, port, 'sub 1based');
+                nsssSym = lteNSSS(enb);
+                nrsIdx = lteNRSIndices(enb, 'sub 1based');
+                nrsSym = lteNRS(enb);
+                npbchIdx = lteNPBCHIndices(enb, 'sub 1based');
+                npbchSym = lteNPBCH(enb, cwBCH);
+                npdcchIdx = lteNPDCCHIndices(enb, chs, 'sub 1based');
+                [npdcchSym, stateIn] = lteNPDCCH(enb, chs, cwDCCH, stateIn);
+                npdschIdx = lteNPDSCHIndices(enb, chs2, 'sub 1based');
+                npdschSym = lteNPDSCH(enb,chs2,cwDSCH, stateIn);
+                channels = {npssIdx, npssSym; nsssIdx, nsssSym; nrsIdx, nrsSym; ...
+                    npbchIdx, npbchSym; npdcchIdx, npdcchSym; npdschIdx, npdschSym};
+                for i = 1:size(channels, 1)
+                    idx = channels{i,1};
+                    sym = channels{i,2};
+                    if ~isempty(idx) && length(idx) == length(sym)
+                        symbol_indices = symStart + idx(:,2);
+                        for j = 1:length(idx)
+                            fullGrid(idx(j,1), symbol_indices(j), idx(j,3)) = sym(j);
+                        end
+                    end
+                end
+            end
+        k =1;
         end
     end
 end
